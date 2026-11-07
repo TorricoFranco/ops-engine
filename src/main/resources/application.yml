@@ -32,6 +32,18 @@ app:
       secret: ${JWT_SECRET}
       ttl: PT8H
 
+  decision:
+    # fake (por defecto) no sale a la red. jev usa la API de TypeSafe y necesita TYPESAFE_API_KEY.
+    provider: ${DECISION_PROVIDER:fake}
+    jev:
+      base-url: https://api.typesafe.ai
+      api-key: ${TYPESAFE_API_KEY:}
+      model: jev-latest
+      connect-timeout: PT2S
+      read-timeout: PT10S
+      max-attempts: 3
+
+
 management:
   endpoints:
     web:

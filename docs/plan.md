@@ -28,7 +28,7 @@ Estado: planificación. No hay código todavía.
 | Documentación API | springdoc-openapi |
 | Tests | JUnit 5, Mockito, AssertJ, Testcontainers, WireMock, ArchUnit |
 | Observabilidad | Actuator, Micrometer, Prometheus, Grafana, logs JSON, OpenTelemetry |
-| IA | Puerto `DecisionProvider` con `FakeDecisionProvider`, `JevDecisionProvider` y, opcionalmente, un adapter para Claude |
+| IA | Puerto `DecisionProvider` con `FakeDecisionProvider` y `JevDecisionProvider` (ADR-005). Resiliencia con los módulos core de Resilience4j |
 | Frontend | Next.js con TypeScript, Tailwind CSS y shadcn/ui; tipos generados desde OpenAPI; Jest + React Testing Library; Playwright para E2E |
 | Infra local | Docker Compose; CI con GitHub Actions |
 
@@ -111,9 +111,9 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 - ADR-002: Módulos por paquete verificados con ArchUnit, sin Spring Modulith
 - ADR-003: Autenticación con JWT propio y resource server
 - ADR-004: La aplicación corre en UTC
+- ADR-005: `DecisionProvider` como puerto, y la IA nunca decide
 
 **Previstos**
-- ADR-005: `DecisionProvider` como puerto. La IA nunca es la autorización final
 - ADR-006: Outbox en lugar de un broker
 - ADR-007: Optimistic locking para asignaciones
 - ADR-008: Resiliencia y fallback a revisión
