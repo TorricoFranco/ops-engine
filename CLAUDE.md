@@ -9,7 +9,9 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 - Fase 0 completa: base del proyecto, CI, health check y ADR-001.
 - Fase 1 completa: aggregates `Ticket` y `Employee`, skills, máquina de estados y tests de dominio.
 - Fase 2 completa: Flyway + JPA, API REST de tickets, empleados y equipos, idempotencia, JWT con roles, OpenAPI y logs JSON. `mvn verify` pasa con 65 tests, 16 de integración con Testcontainers.
-- Próxima: fase 3, `DecisionProvider` con `FakeDecisionProvider` y el adapter de Jev con WireMock. Fases en `docs/plan.md`, sección 8.
+- Fase 3 completa: puerto `DecisionProvider`, `FakeDecisionProvider` determinista, adapter de Jev con reintentos y circuit breaker, y tests de contrato con WireMock. `mvn verify` pasa con 109 tests.
+- Próxima: fase 4, reglas de ruteo y asignación con optimistic locking y outbox. Fases en `docs/plan.md`, sección 8.
+- La IA da juicios, el código decide. Nunca preguntarle a Jev qué hacer con un ticket (ADR-005).
 - La aplicación corre en UTC (ADR-004). Los módulos se verifican con ArchUnit, no con Spring Modulith (ADR-002).
 - Skills propias en `.claude/skills/`: `adr-new` (crear ADRs) y `add-feature` (agregar funcionalidades con sus tests).
 
