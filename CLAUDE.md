@@ -71,8 +71,19 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 ## Git
 
 - No commitear ni hacer push sin que lo pida el usuario.
-- Trabajar en ramas, nunca directo sobre `main`.
-- Mensajes de commit en inglés, con formato Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`).
+- Mensajes de commit en inglés, con formato Conventional Commits (`feat:`, `fix:`, `test:`, `docs:`, `chore:`, `refactor:`).
+- El cuerpo del commit explica el porqué, no repite el diff.
+
+### Ramas
+
+- `main`: solo estado verificado. Nunca se commitea directo.
+- `develop`: rama de integración. Es la base de todo trabajo nuevo.
+- Ramas de trabajo, siempre salidas de `develop`:
+  - `feat/<descripcion-corta>` para funcionalidad nueva
+  - `fix/<descripcion-corta>` para correcciones
+  - `docs/<descripcion-corta>`, `chore/<descripcion-corta>`, `refactor/<descripcion-corta>`
+- Flujo: `feat/x` → `develop` → `main`. A `main` se llega solo con `mvn verify` en verde.
+- Los nombres de rama van en inglés y en kebab-case, por ejemplo `feat/decision-provider-port`.
 
 ## Decisiones
 
