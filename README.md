@@ -2,7 +2,7 @@
 
 Motor de operaciones para soporte técnico: ruteo inteligente de tickets, revisión humana, auditoría y evaluación de decisiones. La IA (Jev, de TypeSafe AI) es un componente controlado: sus sugerencias pasan por reglas explícitas y nunca son la autorización final.
 
-> **Estado:** fase 3 completa (motor de decisiones). Ver [plan del MVP](docs/plan.md).
+> **Estado:** fase 4 completa (ruteo y asignación). Ver [plan del MVP](docs/plan.md).
 
 ## Stack
 
@@ -60,12 +60,22 @@ mvn verify
 - [ADR-003: Autenticación con JWT](docs/adr/ADR-003-autenticacion-jwt.md)
 - [ADR-004: La aplicación corre en UTC](docs/adr/ADR-004-utc-en-toda-la-aplicacion.md)
 - [ADR-005: `DecisionProvider` como puerto, y la IA nunca decide](docs/adr/ADR-005-decision-provider.md)
+- [ADR-006: Outbox transaccional en lugar de un broker](docs/adr/ADR-006-outbox-sin-broker.md)
+- [ADR-007: Optimistic locking con la versión en el aggregate](docs/adr/ADR-007-optimistic-locking.md)
 
 ## El papel de la IA
 
 El modelo responde preguntas acotadas sobre el texto del ticket: qué competencia hace falta, cuánto le impide operar al cliente, si menciona varios afectados o un servicio caído. No decide a quién se asigna ni si hay que escalar: eso depende de permisos, del SLA y de la carga del equipo, y lo resuelven reglas explícitas en el código.
 
 Si el proveedor falla, tarda de más o devuelve algo que no se entiende, el ticket va a revisión humana. Una llamada fallida nunca se convierte en un "no".
+
+Cada decisión se puede explicar. La respuesta del ruteo dice a quién se asignó, qué candidatos se evaluaron, cuáles quedaron afuera y por qué motivo, y con qué versión de reglas se decidió:
+
+```bash
+curl -X POST localhost:8080/api/tickets/{id}/routing -H "Authorization: Bearer $TOKEN"
+```
+
+Hay restricciones que el modelo no puede saltear. Un incidente crítico solo va a alguien con habilitación, y el vencimiento real del SLA pesa más que la urgencia que se desprenda del texto.
 
 Por defecto el sistema usa un proveedor local sin red. Para usar Jev:
 

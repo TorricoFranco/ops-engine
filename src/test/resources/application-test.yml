@@ -5,6 +5,20 @@ spring:
       ddl-auto: validate
 
 app:
+  outbox:
+    dispatcher:
+      # Apagado para que los tests puedan ver los eventos pendientes sin carreras.
+      enabled: false
+
+  routing:
+    policy:
+      version: "test.1"
+      min-skill-recognized: 0.7
+      min-skill-confidence: 0.6
+      critical-noul: 0.7
+      critical-urgency: 0.6
+      sla-at-risk-window: PT30M
+
   security:
     jwt:
       secret: test-only-secret-at-least-32-bytes-long-for-hs256

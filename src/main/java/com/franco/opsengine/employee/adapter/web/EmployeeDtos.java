@@ -1,6 +1,7 @@
 package com.franco.opsengine.employee.adapter.web;
 
 import com.franco.opsengine.employee.domain.Availability;
+import com.franco.opsengine.employee.domain.Clearance;
 import com.franco.opsengine.employee.domain.Employee;
 import com.franco.opsengine.shared.domain.Skill;
 import jakarta.validation.constraints.NotBlank;
@@ -21,7 +22,13 @@ final class EmployeeDtos {
             @NotBlank String name,
             @NotNull UUID teamId,
             @NotEmpty Set<String> skills,
-            @NotNull @Positive Integer maxOpenTickets) {
+            @NotNull @Positive Integer maxOpenTickets,
+            Clearance clearance) {
+
+        /** Sin habilitación explícita, el empleado no atiende incidentes críticos. */
+        public Clearance clearanceOrDefault() {
+            return clearance == null ? Clearance.STANDARD : clearance;
+        }
     }
 
     record EmployeeResponse(
@@ -31,7 +38,8 @@ final class EmployeeDtos {
             List<String> skills,
             int maxOpenTickets,
             int openTickets,
-            Availability availability) {
+            Availability availability,
+            Clearance clearance) {
 
         static EmployeeResponse from(Employee employee) {
             return new EmployeeResponse(
@@ -41,7 +49,8 @@ final class EmployeeDtos {
                     employee.skills().stream().map(Skill::code).sorted().toList(),
                     employee.maxOpenTickets(),
                     employee.openTickets(),
-                    employee.availability());
+                    employee.availability(),
+                    employee.clearance());
         }
     }
 }

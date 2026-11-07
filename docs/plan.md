@@ -67,7 +67,7 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 - **RF-08** Bandeja de revisión: el supervisor asigna o corrige, y registra el motivo cuando no está de acuerdo con la IA.
 - **RF-09** Auditoría reproducible de cada decisión: versión de reglas, entrada resumida, salida del proveedor y acción.
 - **RF-10** Evaluación offline: dataset etiquetado, con reporte de precisión, tasa de revisión e impacto en SLA.
-- **RF-11** ABM de empleados, skills, permisos y reglas por API (rol ADMIN).
+- **RF-11** ABM de empleados, skills y equipos por API (rol ADMIN). Las reglas se versionan por configuración; pasan a tabla cuando haya que editarlas sin desplegar.
 - **RF-12** Autenticación y roles: AGENTE, SUPERVISOR, ADMIN.
 
 ## 6. Requisitos no funcionales
@@ -95,7 +95,7 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 | 0. Base | Repositorio, Maven, Docker Compose con PostgreSQL, CI, ADR-001, README |
 | 1. Dominio | Ticket, Employee, Skills, máquina de estados, tests unitarios |
 | 2. Persistencia y API | Flyway, JPA, endpoints, OpenAPI, idempotencia, autenticación. Logs JSON y health desde acá |
-| 2.1 Pendiente de fase 2 | Clientes, servicios y prioridad del ticket: llegan en la fase 4 con el ruteo, en su propia migración |
+| 2.1 Pendiente | Clientes y servicios como entidades propias: todavía no hicieron falta. El ruteo usa competencias, carga, habilitación y SLA |
 | 3. IA | `DecisionProvider`, Fake, adapter de Jev con WireMock, Resilience4j, fallback |
 | 4. Ruteo y asignación | Reglas, umbrales, optimistic locking, outbox |
 | 5. Revisión humana y auditoría | Bandeja de revisión, motivo de desacuerdo, auditoría completa |
@@ -112,12 +112,11 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 - ADR-003: Autenticación con JWT propio y resource server
 - ADR-004: La aplicación corre en UTC
 - ADR-005: `DecisionProvider` como puerto, y la IA nunca decide
+- ADR-006: Outbox transaccional en lugar de un broker
+- ADR-007: Optimistic locking con la versión en el aggregate
 
 **Previstos**
-- ADR-006: Outbox en lugar de un broker
-- ADR-007: Optimistic locking para asignaciones
-- ADR-008: Resiliencia y fallback a revisión
-- ADR-009: Estrategia de evaluación offline
+- ADR-008: Estrategia de evaluación offline
 
 ## 10. Riesgos
 

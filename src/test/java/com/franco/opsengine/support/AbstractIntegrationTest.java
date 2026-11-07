@@ -8,6 +8,7 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestClient;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -38,6 +39,24 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected TestUserFactory users;
+
+    @Autowired
+    private JdbcTemplate jdbc;
+
+    /**
+     * Borra los datos operativos entre tests.
+     *
+     * <p>El contenedor se comparte, y el ruteo busca candidatos en toda la base: sin esto un
+     * test vería los empleados que dejó otro y las decisiones dejarían de ser reproducibles.
+     * Los usuarios no se tocan, porque los crea cada test solo si faltan.
+     */
+    protected void clearOperationalData() {
+        jdbc.execute("DELETE FROM outbox_events");
+        jdbc.execute("DELETE FROM tickets");
+        jdbc.execute("DELETE FROM employee_skills");
+        jdbc.execute("DELETE FROM employees");
+        jdbc.execute("DELETE FROM teams");
+    }
 
     protected RestClient client() {
         return RestClient.builder()
