@@ -11,7 +11,8 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 - Fase 2 completa: Flyway + JPA, API REST de tickets, empleados y equipos, idempotencia, JWT con roles, OpenAPI y logs JSON. `mvn verify` pasa con 65 tests, 16 de integración con Testcontainers.
 - Fase 3 completa: puerto `DecisionProvider`, `FakeDecisionProvider` determinista, adapter de Jev con reintentos y circuit breaker, y tests de contrato con WireMock. `mvn verify` pasa con 109 tests.
 - Fase 4 completa: reglas de ruteo con candidatos y motivos de descarte, asignación con optimistic locking, outbox transaccional y fallback a revisión. `mvn verify` pasa con 142 tests.
-- Próxima: fase 5, bandeja de revisión humana y auditoría de decisiones. Fases en `docs/plan.md`, sección 8.
+- Fase 5 completa: auditoría append-only de cada decisión, bandeja de revisión, registro del desacuerdo humano y métricas de override. `mvn verify` pasa con 166 tests.
+- Próxima: fase 6, evaluación offline con dataset etiquetado. Fases en `docs/plan.md`, sección 8.
 - La IA da juicios, el código decide. Nunca preguntarle a Jev qué hacer con un ticket (ADR-005).
 - La aplicación corre en UTC (ADR-004). Los módulos se verifican con ArchUnit, no con Spring Modulith (ADR-002).
 - Skills propias en `.claude/skills/`: `adr-new` (crear ADRs) y `add-feature` (agregar funcionalidades con sus tests).

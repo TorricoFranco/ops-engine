@@ -114,9 +114,10 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 - ADR-005: `DecisionProvider` como puerto, y la IA nunca decide
 - ADR-006: Outbox transaccional en lugar de un broker
 - ADR-007: Optimistic locking con la versión en el aggregate
+- ADR-008: Auditoría de decisiones y registro del desacuerdo humano
 
 **Previstos**
-- ADR-008: Estrategia de evaluación offline
+- ADR-009: Estrategia de evaluación offline
 
 ## 10. Riesgos
 
