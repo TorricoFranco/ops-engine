@@ -1,0 +1,20 @@
+# Maven
+target/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Secretos y configuración local
+.env
+*.local.*
+
+# Symlink con ruta absoluta que genera `npx skills add`.
+# Se reconstruye con `npx skills update` a partir de skills-lock.json.
+.claude/skills/find-skills
+
+# Sistema operativo y logs
+*.log
+.DS_Store
+Thumbs.db

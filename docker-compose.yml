@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: ops-engine-postgres
+    environment:
+      POSTGRES_DB: opsengine
+      POSTGRES_USER: opsengine
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opsengine}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opsengine -d opsengine"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
