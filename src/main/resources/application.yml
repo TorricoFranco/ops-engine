@@ -43,6 +43,22 @@ app:
       read-timeout: PT10S
       max-attempts: 3
 
+  routing:
+    policy:
+      # Cambiar cualquier umbral exige subir la versión: es lo que permite reconstruir
+      # después con qué reglas se decidió un ticket viejo.
+      version: "2026-11-07.1"
+      min-skill-recognized: 0.7
+      min-skill-confidence: 0.6
+      critical-noul: 0.7
+      critical-urgency: 0.6
+      sla-at-risk-window: PT30M
+
+  outbox:
+    dispatcher:
+      enabled: true
+      interval-ms: 5000
+
 
 management:
   endpoints:
