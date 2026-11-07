@@ -23,20 +23,23 @@ Motor de operaciones para soporte técnico: ruteo inteligente de tickets, revisi
 
 ```bash
 docker compose up -d
-mvn spring-boot:run
+```
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 Health check: http://localhost:8080/actuator/health
 
 Documentación de la API: http://localhost:8080/swagger-ui.html
 
-Para levantar con datos de ejemplo y usuarios de prueba, usar el perfil `dev`:
+El perfil `dev` carga equipos y empleados de ejemplo, y crea los usuarios `agent`, `supervisor` y `admin`. La contraseña de desarrollo está en `DevUserSeeder` y esos usuarios no existen en ningún otro perfil.
+
+Fuera de `dev` hay que definir `JWT_SECRET` con al menos 32 bytes, o la aplicación no arranca:
 
 ```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
+JWT_SECRET=... mvn spring-boot:run
 ```
-
-El perfil `dev` crea los usuarios `agent`, `supervisor` y `admin`. La contraseña de desarrollo está en `DevUserSeeder`. Estos usuarios no existen en ningún otro perfil.
 
 ## Tests
 
