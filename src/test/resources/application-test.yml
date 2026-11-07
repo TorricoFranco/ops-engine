@@ -1,0 +1,16 @@
+# Perfil de tests. El datasource lo provee Testcontainers con @ServiceConnection.
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+app:
+  security:
+    jwt:
+      secret: test-only-secret-at-least-32-bytes-long-for-hs256
+      ttl: PT1H
+
+logging:
+  level:
+    org.testcontainers: WARN
+    com.github.dockerjava: WARN
