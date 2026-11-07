@@ -19,7 +19,8 @@ class EmployeeTest {
     private static final TeamId TEAM = TeamId.newId();
 
     private static Employee employee(int maxOpenTickets) {
-        return Employee.create(EmployeeId.newId(), "Ana Pérez", TEAM, Set.of(ACCESS), maxOpenTickets);
+        return Employee.create(EmployeeId.newId(), "Ana Pérez", TEAM, Set.of(ACCESS), maxOpenTickets,
+                Clearance.STANDARD);
     }
 
     @Test
@@ -88,29 +89,42 @@ class EmployeeTest {
 
     @Test
     void needsAtLeastOneSkill() {
-        assertThatThrownBy(() -> Employee.create(EmployeeId.newId(), "Ana", TEAM, Set.of(), 3))
+        assertThatThrownBy(() -> Employee.create(EmployeeId.newId(), "Ana", TEAM, Set.of(), 3, Clearance.STANDARD))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void maxOpenTicketsMustBePositive() {
-        assertThatThrownBy(() -> Employee.create(EmployeeId.newId(), "Ana", TEAM, Set.of(ACCESS), 0))
+        assertThatThrownBy(() -> Employee.create(EmployeeId.newId(), "Ana", TEAM, Set.of(ACCESS), 0, Clearance.STANDARD))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void needsATeam() {
-        assertThatThrownBy(() -> Employee.create(EmployeeId.newId(), "Ana", null, Set.of(ACCESS), 3))
+        assertThatThrownBy(() -> Employee.create(EmployeeId.newId(), "Ana", null, Set.of(ACCESS), 3, Clearance.STANDARD))
                 .isInstanceOf(NullPointerException.class);
     }
 
     @Test
     void rebuildRestoresAvailabilityAndLoad() {
         Employee employee = Employee.rebuild(
-                EmployeeId.newId(), "Ana", TEAM, Set.of(ACCESS), 5, Availability.UNAVAILABLE, 3);
+                EmployeeId.newId(), "Ana", TEAM, Set.of(ACCESS), 5, Clearance.STANDARD,
+                Availability.UNAVAILABLE, 3, 7);
 
         assertThat(employee.availability()).isEqualTo(Availability.UNAVAILABLE);
         assertThat(employee.openTickets()).isEqualTo(3);
         assertThat(employee.canTake(ACCESS)).isFalse();
+        assertThat(employee.version()).isEqualTo(7);
+    }
+
+    @Test
+    void onlyAnAgentWithClearanceCanTakeCriticalIncidents() {
+        Employee standard = employee(3);
+        Employee cleared = Employee.create(
+                EmployeeId.newId(), "Diego", TEAM, Set.of(ACCESS), 3, Clearance.CRITICAL);
+
+        assertThat(standard.isAllowedFor(true)).isFalse();
+        assertThat(standard.isAllowedFor(false)).isTrue();
+        assertThat(cleared.isAllowedFor(true)).isTrue();
     }
 }

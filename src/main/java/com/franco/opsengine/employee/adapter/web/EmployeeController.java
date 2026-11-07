@@ -42,7 +42,8 @@ class EmployeeController {
     ResponseEntity<EmployeeResponse> register(@Valid @RequestBody RegisterEmployeeRequest request) {
         Set<Skill> skills = request.skills().stream().map(Skill::new).collect(Collectors.toSet());
         var employee = employees.register(
-                request.name(), new TeamId(request.teamId()), skills, request.maxOpenTickets());
+                request.name(), new TeamId(request.teamId()), skills, request.maxOpenTickets(),
+                request.clearanceOrDefault());
 
         return ResponseEntity
                 .created(URI.create("/api/employees/" + employee.id().value()))
