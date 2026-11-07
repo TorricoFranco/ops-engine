@@ -14,6 +14,10 @@ INSERT INTO employees (id, name, team_id, availability, max_open_tickets, open_t
     ('aaaaaaaa-0000-0000-0000-000000000003', 'Carla Suárez',   '33333333-3333-3333-3333-333333333333', 'AVAILABLE', 4, 0),
     ('aaaaaaaa-0000-0000-0000-000000000004', 'Diego Ramírez',  '44444444-4444-4444-4444-444444444444', 'AVAILABLE', 4, 0);
 
+-- Diego atiende infraestructura y tiene habilitación para incidentes críticos.
+UPDATE employees SET clearance = 'CRITICAL'
+ WHERE id = 'aaaaaaaa-0000-0000-0000-000000000004';
+
 INSERT INTO employee_skills (employee_id, skill_code) VALUES
     ('aaaaaaaa-0000-0000-0000-000000000001', 'ACCESS_IDENTITY'),
     ('aaaaaaaa-0000-0000-0000-000000000002', 'BILLING'),

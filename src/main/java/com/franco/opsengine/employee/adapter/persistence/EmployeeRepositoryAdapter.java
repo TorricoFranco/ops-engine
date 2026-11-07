@@ -1,6 +1,7 @@
 package com.franco.opsengine.employee.adapter.persistence;
 
 import com.franco.opsengine.employee.application.EmployeeRepository;
+import com.franco.opsengine.employee.domain.Clearance;
 import com.franco.opsengine.employee.domain.Employee;
 import com.franco.opsengine.shared.domain.EmployeeId;
 import com.franco.opsengine.shared.domain.Skill;
@@ -31,7 +32,9 @@ class EmployeeRepositoryAdapter implements EmployeeRepository {
                 employee.availability(),
                 employee.maxOpenTickets(),
                 employee.openTickets(),
-                skillCodes);
+                skillCodes,
+                employee.clearance(),
+                employee.version());
         return toDomain(jpa.saveAndFlush(entity));
     }
 
@@ -58,7 +61,9 @@ class EmployeeRepositoryAdapter implements EmployeeRepository {
                 new TeamId(entity.getTeamId()),
                 skills,
                 entity.getMaxOpenTickets(),
+                entity.getClearance(),
                 entity.getAvailability(),
-                entity.getOpenTickets());
+                entity.getOpenTickets(),
+                entity.getVersion());
     }
 }

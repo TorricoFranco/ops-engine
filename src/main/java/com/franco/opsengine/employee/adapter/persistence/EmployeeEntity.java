@@ -1,6 +1,7 @@
 package com.franco.opsengine.employee.adapter.persistence;
 
 import com.franco.opsengine.employee.domain.Availability;
+import com.franco.opsengine.employee.domain.Clearance;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -40,6 +41,10 @@ public class EmployeeEntity {
     @Column(name = "open_tickets", nullable = false)
     private int openTickets;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Clearance clearance;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "employee_skills", joinColumns = @JoinColumn(name = "employee_id"))
     @Column(name = "skill_code", nullable = false, length = 50)
@@ -54,7 +59,7 @@ public class EmployeeEntity {
     }
 
     EmployeeEntity(UUID id, String name, UUID teamId, Availability availability, int maxOpenTickets,
-                   int openTickets, Set<String> skills) {
+                   int openTickets, Set<String> skills, Clearance clearance, long version) {
         this.id = id;
         this.name = name;
         this.teamId = teamId;
@@ -62,6 +67,8 @@ public class EmployeeEntity {
         this.maxOpenTickets = maxOpenTickets;
         this.openTickets = openTickets;
         this.skills = new HashSet<>(skills);
+        this.clearance = clearance;
+        this.version = version;
     }
 
     UUID getId() {
@@ -90,6 +97,10 @@ public class EmployeeEntity {
 
     Set<String> getSkills() {
         return skills;
+    }
+
+    Clearance getClearance() {
+        return clearance;
     }
 
     long getVersion() {

@@ -3,6 +3,7 @@ package com.franco.opsengine.ticket.domain;
 import com.franco.opsengine.shared.domain.EmployeeId;
 import com.franco.opsengine.shared.domain.Skill;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,12 +23,13 @@ public class Ticket {
     private final Skill requiredSkill;
     private final Instant createdAt;
     private final Instant slaDeadline;
+    private final long version;
     private TicketStatus status;
     private EmployeeId assignee;
     private String reviewReason;
 
     private Ticket(TicketId id, String title, String description, Impact impact, Skill requiredSkill,
-                   Instant createdAt, Instant slaDeadline) {
+                   Instant createdAt, Instant slaDeadline, long version) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -35,6 +37,7 @@ public class Ticket {
         this.requiredSkill = requiredSkill;
         this.createdAt = createdAt;
         this.slaDeadline = slaDeadline;
+        this.version = version;
         this.status = TicketStatus.NUEVO;
     }
 
@@ -55,7 +58,7 @@ public class Ticket {
             throw new IllegalArgumentException("SLA deadline must be after the creation time");
         }
 
-        return new Ticket(id, cleanTitle, cleanDescription, impact, requiredSkill, createdAt, slaDeadline);
+        return new Ticket(id, cleanTitle, cleanDescription, impact, requiredSkill, createdAt, slaDeadline, 0);
     }
 
     /**
@@ -64,8 +67,10 @@ public class Ticket {
      */
     public static Ticket rebuild(TicketId id, String title, String description, Impact impact, Skill requiredSkill,
                                  Instant createdAt, Instant slaDeadline, TicketStatus status,
-                                 EmployeeId assignee, String reviewReason) {
-        Ticket ticket = open(id, title, description, impact, requiredSkill, createdAt, slaDeadline);
+                                 EmployeeId assignee, String reviewReason, long version) {
+        Ticket draft = open(id, title, description, impact, requiredSkill, createdAt, slaDeadline);
+        Ticket ticket = new Ticket(draft.id, draft.title, draft.description, draft.impact,
+                draft.requiredSkill, draft.createdAt, draft.slaDeadline, version);
         ticket.status = Objects.requireNonNull(status, "status is required");
         ticket.assignee = assignee;
         ticket.reviewReason = reviewReason;
@@ -140,6 +145,15 @@ public class Ticket {
 
     public Instant slaDeadline() {
         return slaDeadline;
+    }
+
+    public long version() {
+        return version;
+    }
+
+    /** Cuánto falta para que venza el SLA. Negativo si ya venció. */
+    public Duration timeToSlaDeadline(Instant now) {
+        return Duration.between(now, slaDeadline);
     }
 
     public TicketStatus status() {

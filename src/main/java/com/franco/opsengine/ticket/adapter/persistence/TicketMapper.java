@@ -22,7 +22,8 @@ final class TicketMapper {
                 ticket.reviewReason().orElse(null),
                 ticket.createdAt(),
                 ticket.slaDeadline(),
-                idempotencyKey);
+                idempotencyKey,
+                ticket.version());
     }
 
     static Ticket toDomain(TicketEntity entity) {
@@ -36,6 +37,7 @@ final class TicketMapper {
                 entity.getSlaDeadline(),
                 entity.getStatus(),
                 entity.getAssigneeId() == null ? null : new EmployeeId(entity.getAssigneeId()),
-                entity.getReviewReason());
+                entity.getReviewReason(),
+                entity.getVersion());
     }
 }

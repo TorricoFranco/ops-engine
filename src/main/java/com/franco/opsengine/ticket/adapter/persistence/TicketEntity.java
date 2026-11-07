@@ -65,7 +65,7 @@ public class TicketEntity {
 
     TicketEntity(UUID id, String title, String description, Impact impact, String requiredSkill,
                  TicketStatus status, UUID assigneeId, String reviewReason, Instant createdAt,
-                 Instant slaDeadline, String idempotencyKey) {
+                 Instant slaDeadline, String idempotencyKey, long version) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -77,6 +77,7 @@ public class TicketEntity {
         this.createdAt = createdAt;
         this.slaDeadline = slaDeadline;
         this.idempotencyKey = idempotencyKey;
+        this.version = version;
     }
 
     UUID getId() {

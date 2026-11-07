@@ -1,5 +1,6 @@
 package com.franco.opsengine.employee.application;
 
+import com.franco.opsengine.employee.domain.Clearance;
 import com.franco.opsengine.employee.domain.Employee;
 import com.franco.opsengine.shared.domain.EmployeeId;
 import com.franco.opsengine.shared.domain.Skill;
@@ -21,8 +22,9 @@ public class EmployeeService {
         this.employees = employees;
     }
 
-    public Employee register(String name, TeamId teamId, Set<Skill> skills, int maxOpenTickets) {
-        return employees.save(Employee.create(EmployeeId.newId(), name, teamId, skills, maxOpenTickets));
+    public Employee register(String name, TeamId teamId, Set<Skill> skills, int maxOpenTickets,
+                             Clearance clearance) {
+        return employees.save(Employee.create(EmployeeId.newId(), name, teamId, skills, maxOpenTickets, clearance));
     }
 
     public Employee byId(EmployeeId id) {

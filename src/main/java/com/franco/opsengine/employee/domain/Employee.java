@@ -18,34 +18,41 @@ public class Employee {
     private final TeamId teamId;
     private final Set<Skill> skills;
     private final int maxOpenTickets;
+    private final Clearance clearance;
+    private final long version;
     private Availability availability;
     private int openTickets;
 
     private Employee(EmployeeId id, String name, TeamId teamId, Set<Skill> skills, int maxOpenTickets,
-                     Availability availability, int openTickets) {
+                     Clearance clearance, Availability availability, int openTickets, long version) {
         this.id = id;
         this.name = name;
         this.teamId = teamId;
         this.skills = skills;
         this.maxOpenTickets = maxOpenTickets;
+        this.clearance = clearance;
         this.availability = availability;
         this.openTickets = openTickets;
+        this.version = version;
     }
 
-    public static Employee create(EmployeeId id, String name, TeamId teamId, Set<Skill> skills, int maxOpenTickets) {
-        return rebuild(id, name, teamId, skills, maxOpenTickets, Availability.AVAILABLE, 0);
+    public static Employee create(EmployeeId id, String name, TeamId teamId, Set<Skill> skills,
+                                  int maxOpenTickets, Clearance clearance) {
+        return rebuild(id, name, teamId, skills, maxOpenTickets, clearance, Availability.AVAILABLE, 0, 0);
     }
 
     /**
-     * Reconstruye un empleado ya existente. Lo usa la capa de persistencia; el resto del
-     * código crea empleados nuevos con {@link #create}.
+     * Reconstruye un empleado ya existente, con la versión que tenía en la base. Esa versión
+     * viaja de vuelta al guardar: si otra transacción lo modificó mientras tanto, el guardado
+     * falla en lugar de pisar el cambio (RF-06).
      */
     public static Employee rebuild(EmployeeId id, String name, TeamId teamId, Set<Skill> skills, int maxOpenTickets,
-                                   Availability availability, int openTickets) {
+                                   Clearance clearance, Availability availability, int openTickets, long version) {
         Objects.requireNonNull(id, "employee id is required");
         Objects.requireNonNull(teamId, "team id is required");
         Objects.requireNonNull(skills, "skills are required");
         Objects.requireNonNull(availability, "availability is required");
+        Objects.requireNonNull(clearance, "clearance is required");
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("name is required");
         }
@@ -58,7 +65,8 @@ public class Employee {
         if (openTickets < 0) {
             throw new IllegalArgumentException("open tickets cannot be negative");
         }
-        return new Employee(id, name.trim(), teamId, Set.copyOf(skills), maxOpenTickets, availability, openTickets);
+        return new Employee(id, name.trim(), teamId, Set.copyOf(skills), maxOpenTickets, clearance,
+                availability, openTickets, version);
     }
 
     public boolean canTake(Skill requiredSkill) {
@@ -105,6 +113,19 @@ public class Employee {
 
     public int maxOpenTickets() {
         return maxOpenTickets;
+    }
+
+    public Clearance clearance() {
+        return clearance;
+    }
+
+    public long version() {
+        return version;
+    }
+
+    /** Un incidente crítico solo puede ir a quien tiene la habilitación. */
+    public boolean isAllowedFor(boolean criticalIncident) {
+        return !criticalIncident || clearance.allowsCriticalIncidents();
     }
 
     public Availability availability() {
