@@ -39,6 +39,16 @@ class FakeDecisionProviderTest {
     }
 
     @Test
+    void punctuationDoesNotBlockAMatch() {
+        // La descripción de BILLING dice "Cobros duplicados, facturas y reembolsos.": sin
+        // normalizar la puntuación se buscaría "duplicados," y no coincidiría con nada.
+        TicketJudgement judgement = judge("Reclamo", "Tengo cobros duplicados en mi cuenta");
+
+        assertThat(judgement.suggestedSkill()).isEqualTo(new Skill("BILLING"));
+        assertThat(judgement.skillRecognized().isYes(NoulAnswer.DEFAULT_YES)).isTrue();
+    }
+
+    @Test
     void reportsALowSkillRecognizedWhenNothingMatches() {
         TicketJudgement judgement = judge("Consulta", "Quisiera saber el horario de atención");
 

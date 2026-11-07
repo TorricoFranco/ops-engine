@@ -31,6 +31,7 @@ public class FakeDecisionProvider implements DecisionProvider {
     public static final String NAME = "fake";
 
     private static final int URGENCY_LEVELS = 5;
+    private static final double SMOOTHING = 0.25;
     private static final Set<String> STOP_WORDS = Set.of(
             "de", "la", "el", "los", "las", "un", "una", "y", "o", "en", "con", "para", "por",
             "del", "al", "que", "se", "su", "sus", "es", "the", "a", "of", "to", "and");
@@ -87,11 +88,18 @@ public class FakeDecisionProvider implements DecisionProvider {
         return scores;
     }
 
-    /** Suaviza con 1 por opción, así ninguna queda en cero y las probabilidades suman 1. */
+    /**
+     * Suaviza para que ninguna opción quede en cero y las probabilidades sumen 1.
+     *
+     * <p>El suavizado es chico a propósito. Con uno más fuerte, una coincidencia clara queda
+     * repartida entre todas las opciones y nunca supera los umbrales de ruteo: el proveedor
+     * mandaría todo a revisión y no serviría ni para la demo ni como línea de base.
+     */
     private static Map<String, Double> toProbabilities(Map<String, Double> scores) {
-        double total = scores.values().stream().mapToDouble(Double::doubleValue).sum() + scores.size();
+        double total = scores.values().stream().mapToDouble(Double::doubleValue).sum()
+                + scores.size() * SMOOTHING;
         Map<String, Double> probabilities = new LinkedHashMap<>();
-        scores.forEach((skill, score) -> probabilities.put(skill, (score + 1) / total));
+        scores.forEach((skill, score) -> probabilities.put(skill, (score + SMOOTHING) / total));
         return probabilities;
     }
 
@@ -117,27 +125,27 @@ public class FakeDecisionProvider implements DecisionProvider {
     }
 
     /**
-     * Minúsculas, sin acentos y con los espacios colapsados, para que "caído" y "caido"
-     * cuenten igual y las palabras se puedan separar por un espacio simple.
+     * Minúsculas, sin acentos y sin puntuación, con los espacios colapsados.
+     *
+     * <p>Quitar la puntuación importa: sin eso se buscaría "cobros," contra un texto que dice
+     * "cobros" y la coincidencia se perdería.
      */
     private static String normalize(String value) {
         String decomposed = Normalizer.normalize(value.toLowerCase(Locale.ROOT), Normalizer.Form.NFD);
         StringBuilder out = new StringBuilder(decomposed.length());
-        boolean lastWasSpace = false;
+        boolean lastWasSpace = true;
         for (int i = 0; i < decomposed.length(); i++) {
             char c = decomposed.charAt(i);
             if (Character.getType(c) == Character.NON_SPACING_MARK) {
                 continue;
             }
-            if (Character.isWhitespace(c)) {
-                if (!lastWasSpace) {
-                    out.append(' ');
-                    lastWasSpace = true;
-                }
-                continue;
+            if (Character.isLetterOrDigit(c)) {
+                out.append(c);
+                lastWasSpace = false;
+            } else if (!lastWasSpace) {
+                out.append(' ');
+                lastWasSpace = true;
             }
-            out.append(c);
-            lastWasSpace = false;
         }
         return out.toString().trim();
     }
