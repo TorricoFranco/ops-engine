@@ -2,7 +2,7 @@
 
 Motor de operaciones para soporte técnico: ruteo inteligente de tickets, revisión humana, auditoría y evaluación de decisiones. La IA (Jev, de TypeSafe AI) es un componente controlado: sus sugerencias pasan por reglas explícitas y nunca son la autorización final.
 
-> **Estado:** fase 4 completa (ruteo y asignación). Ver [plan del MVP](docs/plan.md).
+> **Estado:** fase 5 completa (revisión humana y auditoría). Ver [plan del MVP](docs/plan.md).
 
 ## Stack
 
@@ -62,6 +62,7 @@ mvn verify
 - [ADR-005: `DecisionProvider` como puerto, y la IA nunca decide](docs/adr/ADR-005-decision-provider.md)
 - [ADR-006: Outbox transaccional en lugar de un broker](docs/adr/ADR-006-outbox-sin-broker.md)
 - [ADR-007: Optimistic locking con la versión en el aggregate](docs/adr/ADR-007-optimistic-locking.md)
+- [ADR-008: Auditoría de decisiones y registro del desacuerdo humano](docs/adr/ADR-008-auditoria-de-decisiones.md)
 
 ## El papel de la IA
 
@@ -76,6 +77,14 @@ curl -X POST localhost:8080/api/tickets/{id}/routing -H "Authorization: Bearer $
 ```
 
 Hay restricciones que el modelo no puede saltear. Un incidente crítico solo va a alguien con habilitación, y el vencimiento real del SLA pesa más que la urgencia que se desprenda del texto.
+
+Cada decisión queda guardada con sus probabilidades, la versión de reglas y los candidatos descartados, así que se puede reconstruir meses después:
+
+```bash
+curl localhost:8080/api/tickets/{id}/decisions -H "Authorization: Bearer $TOKEN"
+```
+
+Cuando un ticket va a revisión, el supervisor dice si coincidió con lo que sugirió el sistema y, si no, por qué. De ahí sale la tasa de override, en `/api/review/metrics`. Si el proveedor no respondió no hubo sugerencia que contrastar, y ese caso no cuenta como desacuerdo.
 
 Por defecto el sistema usa un proveedor local sin red. Para usar Jev:
 
