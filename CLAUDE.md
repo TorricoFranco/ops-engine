@@ -87,6 +87,18 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 - Flujo: `feat/x` → `develop` → `main`. A `main` se llega solo con `mvn verify` en verde.
 - Los nombres de rama van en inglés y en kebab-case, por ejemplo `feat/decision-provider-port`.
 
+### `main` está protegida
+
+GitHub rechaza cualquier push directo a `main`, incluido el del dueño del repositorio. Para integrar:
+
+```bash
+gh pr create --base main --head develop --fill
+```
+
+La protección exige pull request, el check `build` en verde, y que la rama esté al día con `main`. No permite force push ni borrar la rama. Después de mergear, traer el resultado con `git switch main && git pull`.
+
+No intentar `git push origin main`: siempre falla.
+
 ## Decisiones
 
 - Cada decisión de arquitectura nueva va en un ADR en `docs/adr/`, numerado a partir de `ADR-002`.

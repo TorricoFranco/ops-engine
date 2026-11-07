@@ -47,6 +47,10 @@ JWT_SECRET=... mvn spring-boot:run
 mvn verify
 ```
 
+## Contribuir
+
+`main` está protegida: los cambios entran por pull request desde `develop`, con el CI en verde. Las ramas de trabajo salen de `develop` y usan los prefijos `feat/`, `fix/`, `docs/`, `chore/` o `refactor/`.
+
 ## Documentación
 
 - [Plan del MVP](docs/plan.md)
