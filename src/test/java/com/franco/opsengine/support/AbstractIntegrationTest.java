@@ -51,6 +51,9 @@ public abstract class AbstractIntegrationTest {
      * Los usuarios no se tocan, porque los crea cada test solo si faltan.
      */
     protected void clearOperationalData() {
+        // En orden de dependencia. decision_candidates se va en cascada con su decisión.
+        jdbc.execute("DELETE FROM review_resolutions");
+        jdbc.execute("DELETE FROM decision_records");
         jdbc.execute("DELETE FROM outbox_events");
         jdbc.execute("DELETE FROM tickets");
         jdbc.execute("DELETE FROM employee_skills");
