@@ -1,5 +1,8 @@
 package com.franco.opsengine.routing.application;
 
+import com.franco.opsengine.audit.application.DecisionRecordRepository;
+import com.franco.opsengine.audit.domain.DecisionRecord;
+import com.franco.opsengine.audit.domain.JudgementSnapshot;
 import com.franco.opsengine.decision.application.DecisionProvider;
 import com.franco.opsengine.decision.domain.DecisionUnavailableException;
 import com.franco.opsengine.decision.domain.TicketContext;
@@ -47,17 +50,20 @@ public class RouteTicketUseCase {
     private final DecisionProvider decisions;
     private final SkillCatalog skills;
     private final OutboxRepository outbox;
+    private final DecisionRecordRepository decisionLog;
     private final RoutingPolicy policy;
     private final Clock clock;
 
     public RouteTicketUseCase(TicketRepository tickets, EmployeeRepository employees,
                               DecisionProvider decisions, SkillCatalog skills,
-                              OutboxRepository outbox, RoutingPolicy policy, Clock clock) {
+                              OutboxRepository outbox, DecisionRecordRepository decisionLog,
+                              RoutingPolicy policy, Clock clock) {
         this.tickets = tickets;
         this.employees = employees;
         this.decisions = decisions;
         this.skills = skills;
         this.outbox = outbox;
+        this.decisionLog = decisionLog;
         this.policy = policy;
         this.clock = clock;
     }
@@ -68,16 +74,29 @@ public class RouteTicketUseCase {
         ticket.startEvaluation();
 
         Instant now = clock.instant();
-        RoutingOutcome outcome = judgeAndDecide(ticket, now);
+        long startedAt = System.nanoTime();
+        Decided decided = judgeAndDecide(ticket, now);
+        long latencyMs = (System.nanoTime() - startedAt) / 1_000_000;
 
+        RoutingOutcome outcome = decided.outcome();
         switch (outcome) {
             case RoutingOutcome.Assign assign -> applyAssignment(ticket, assign, now);
             case RoutingOutcome.SendToReview review -> applyReview(ticket, review, now);
         }
+
+        // La auditoría va en la misma transacción que el cambio: una decisión aplicada que no
+        // quedó registrada no se podría explicar después (RF-09).
+        decisionLog.record(DecisionRecord.of(
+                ticket.id(), decisions.name(), decided.judgement(), outcome, latencyMs, now));
+
         return outcome;
     }
 
-    private RoutingOutcome judgeAndDecide(Ticket ticket, Instant now) {
+    /** El resultado junto con el juicio que lo produjo, que puede no existir. */
+    private record Decided(RoutingOutcome outcome, JudgementSnapshot judgement) {
+    }
+
+    private Decided judgeAndDecide(Ticket ticket, Instant now) {
         TicketJudgement judgement;
         try {
             judgement = decisions.judge(new TicketContext(ticket.title(), ticket.description(), skills.all()));
@@ -86,18 +105,20 @@ public class RouteTicketUseCase {
             // persona, y no se pierde.
             log.warn("Decision provider unavailable, sending the ticket to review ticketId={} reason={}",
                     ticket.id().value(), e.getMessage());
-            return new RoutingOutcome.SendToReview(
+            return new Decided(new RoutingOutcome.SendToReview(
                     ReviewReason.PROVIDER_UNAVAILABLE,
                     "el proveedor de decisiones no respondió: " + e.getMessage(),
                     List.of(),
-                    policy.version());
+                    policy.version()), null);
         }
 
         List<RoutingCandidate> candidates = employees.findBySkill(judgement.suggestedSkill()).stream()
                 .map(RouteTicketUseCase::toCandidate)
                 .toList();
 
-        return RoutingRules.decide(judgement, candidates, ticket.timeToSlaDeadline(now), policy);
+        return new Decided(
+                RoutingRules.decide(judgement, candidates, ticket.timeToSlaDeadline(now), policy),
+                JudgementSnapshot.of(judgement));
     }
 
     private void applyAssignment(Ticket ticket, RoutingOutcome.Assign assign, Instant now) {
