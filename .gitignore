@@ -22,3 +22,8 @@ Thumbs.db
 # Dataset y reporte de evaluación: los genera y etiqueta cada persona.
 docs/evaluation/dataset.csv
 docs/evaluation/report.md
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/next-env.d.ts

@@ -19,6 +19,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -35,8 +37,13 @@ class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(
+            HttpSecurity http,
+            // Spring MVC registra otro bean que también implementa esta interfaz, así que hay
+            // que nombrar el que corresponde.
+            @Qualifier("corsConfigurationSource") CorsConfigurationSource cors) throws Exception {
         return http
+                .cors(it -> it.configurationSource(cors))
                 // La API no usa cookies de sesión, así que CSRF no aplica.
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

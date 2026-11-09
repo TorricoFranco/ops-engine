@@ -16,7 +16,9 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 - Áreas de soporte: cinco, incluida `ACCOUNT_MANAGEMENT` para consultas comerciales. Agregar una es una fila en una migración, no código.
 - Un ticket ilegible va a `INFORMACION_INSUFICIENTE` y se le piden datos al cliente: la revisión humana es para lo dudoso, no para el ruido.
 - El ruteo corre en un worker de fondo y la llamada al proveedor queda fuera de la transacción (ADR-010). Nunca poner `@Transactional` alrededor de una llamada de red.
-- Próxima: fase 7 (observabilidad) o fase 8 (frontend). Fases en `docs/plan.md`, sección 8.
+- Fase 8 completa: consola de operaciones con panel, tickets, detalle de la decisión y bandeja de revisión. 12 tests de frontend.
+- Próxima: fase 7, observabilidad con Prometheus y Grafana. Fases en `docs/plan.md`, sección 8.
+- En la interfaz, los enums del dominio se traducen a castellano. Mostrar el enum crudo obliga a conocer el código para leer la pantalla.
 - La evaluación corre con `mvn spring-boot:run -Dspring-boot.run.arguments="--evaluate"`. No levanta Spring ni toca la base.
 - El dataset de evaluación lo etiqueta una persona, nunca el código: si saliera de las reglas del sistema, el resultado sería circular (ADR-009).
 - La IA da juicios, el código decide. Nunca preguntarle a Jev qué hacer con un ticket (ADR-005).
@@ -29,13 +31,15 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 - PostgreSQL 17 con Docker Compose. Desde la fase 2: Spring Data JPA y Flyway.
 - Tests: JUnit 5, AssertJ, Mockito, Testcontainers, WireMock, ArchUnit.
 - IA: TypeSafe Jev detrás del puerto `DecisionProvider`. Mientras no haya clave, usar `FakeDecisionProvider`.
-- Frontend (fase 8): Next.js con TypeScript, Tailwind CSS y shadcn/ui. Tests con Jest, React Testing Library y Playwright. Jest solo va en el frontend.
+- Frontend en `frontend/`: Next.js 16, React 19, Tailwind 4 y TypeScript. Tests con Jest y React Testing Library. Sin shadcn/ui (ADR-011). Jest solo va en el frontend.
 
 ## Comandos
 
 - Levantar PostgreSQL: `docker compose up -d`
 - Correr la app: `mvn spring-boot:run`
 - Build completo con tests: `mvn verify`. Es lo mismo que corre el CI. Correrlo antes de dar algo por terminado.
+- Frontend: `npm --prefix frontend run dev`, `npm --prefix frontend test`, `npm --prefix frontend run build`.
+- Demo completa: `docker compose up -d`, después la API con el perfil `dev` y `DECISION_PROVIDER=jev`, y el frontend en el 3000.
 - Un solo test: `mvn -Dtest=NombreDeClase test`
 - Maven todavía no está en el PATH. Mientras tanto, usar `C:\Users\Franco\tools\apache-maven-3.9.16\bin\mvn`.
 
@@ -103,7 +107,7 @@ GitHub rechaza cualquier push directo a `main`, incluido el del dueño del repos
 gh pr create --base main --head develop --fill
 ```
 
-La protección exige pull request, el check `build` en verde, y que la rama esté al día con `main`. No permite force push ni borrar la rama. Después de mergear, traer el resultado con `git switch main && git pull`.
+La protección exige pull request, los checks `backend` y `frontend` en verde, y que la rama esté al día con `main`. No permite force push ni borrar la rama. Después de mergear, traer el resultado con `git switch main && git pull`.
 
 No intentar `git push origin main`: siempre falla.
 
