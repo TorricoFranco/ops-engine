@@ -18,6 +18,19 @@ Para usar otros archivos:
 mvn spring-boot:run -Dspring-boot.run.arguments="--evaluate --dataset mi.csv --report salida.md"
 ```
 
+## La clave de Jev
+
+La aplicación lee `TYPESAFE_API_KEY` del entorno del sistema. **No** la lee de un archivo
+`.env`: Spring Boot no tiene soporte para ese formato, y el `.env` del repositorio existe solo
+para docker compose.
+
+```bash
+setx TYPESAFE_API_KEY "..."
+```
+
+Hay que abrir una terminal nueva después. Sin la clave, la evaluación corre igual y deja Jev
+afuera del reporte.
+
 ## El dataset
 
 Copiá `dataset.example.csv` a `dataset.csv` y completá la columna `expected_skill`.
