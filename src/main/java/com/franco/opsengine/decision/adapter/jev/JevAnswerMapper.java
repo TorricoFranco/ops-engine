@@ -29,7 +29,8 @@ final class JevAnswerMapper {
                 noul(response, JevQuestions.SKILL_RECOGNIZED),
                 score(response, JevQuestions.URGENCY),
                 noul(response, JevQuestions.MULTIPLE_CUSTOMERS),
-                noul(response, JevQuestions.SERVICE_UNAVAILABLE));
+                noul(response, JevQuestions.SERVICE_UNAVAILABLE),
+                noul(response, JevQuestions.ENOUGH_INFORMATION));
     }
 
     private static JevResponse.Answer answer(JevResponse response, String id) {

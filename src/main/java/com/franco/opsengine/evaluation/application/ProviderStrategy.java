@@ -64,6 +64,11 @@ public class ProviderStrategy implements EvaluationStrategy {
         return switch (outcome) {
             case RoutingOutcome.Assign assign -> Decision.assignTo(assign.employeeId());
             case RoutingOutcome.SendToReview review -> Decision.review(review.reason().name());
+            // Pedir datos tampoco resuelve el ticket, así que para la medición cuenta como no
+            // resuelto. Se distingue con su propio motivo: no es lo mismo no saber a quién
+            // mandarlo que no haber entendido el texto.
+            case RoutingOutcome.RequestMoreInformation ignored ->
+                    Decision.review("NEEDS_MORE_INFORMATION");
         };
     }
 }

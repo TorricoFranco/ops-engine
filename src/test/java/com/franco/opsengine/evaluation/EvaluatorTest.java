@@ -31,7 +31,7 @@ class EvaluatorTest {
             ACCESS, "Inicio de sesión, contraseñas, permisos y accesos de usuarios."));
 
     private static final RoutingPolicy POLICY = new RoutingPolicy(
-            "test.1", 0.7, 0.6, 0.7, 0.6, Duration.ofMinutes(30));
+            "test.1", 0.7, 0.6, 0.7, 0.6, Duration.ofMinutes(30), 0.5);
 
     private static EvaluationRoster roster() {
         return EvaluationRoster.forSkills(SKILLS);

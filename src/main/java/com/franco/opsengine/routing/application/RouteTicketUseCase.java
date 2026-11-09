@@ -82,6 +82,7 @@ public class RouteTicketUseCase {
         switch (outcome) {
             case RoutingOutcome.Assign assign -> applyAssignment(ticket, assign, now);
             case RoutingOutcome.SendToReview review -> applyReview(ticket, review, now);
+            case RoutingOutcome.RequestMoreInformation more -> applyMoreInformation(ticket, more, now);
         }
 
         // La auditoría va en la misma transacción que el cambio: una decisión aplicada que no
@@ -148,6 +149,20 @@ public class RouteTicketUseCase {
 
         log.info("Ticket sent to review ticketId={} reason={} policyVersion={}",
                 ticket.id().value(), review.reason(), review.policyVersion());
+    }
+
+    private void applyMoreInformation(Ticket ticket, RoutingOutcome.RequestMoreInformation more,
+                                      Instant now) {
+        ticket.requestMoreInformation(more.rationale());
+        tickets.save(ticket, null);
+        outbox.record(OutboxEvent.of(RoutingEvents.TICKET_NEEDS_MORE_INFORMATION,
+                ticket.id().value(),
+                """
+                {"ticketId":"%s","policyVersion":"%s"}"""
+                        .formatted(ticket.id().value(), more.policyVersion()), now));
+
+        log.info("Ticket needs more information ticketId={} policyVersion={}",
+                ticket.id().value(), more.policyVersion());
     }
 
     private static RoutingCandidate toCandidate(Employee employee) {

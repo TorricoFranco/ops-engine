@@ -62,7 +62,8 @@ public class FakeDecisionProvider implements DecisionProvider {
                 new NoulAnswer(anyMatch ? 0.85 : 0.2),
                 urgency(text),
                 new NoulAnswer(contains(text, MANY_CUSTOMERS_WORDS) ? 0.9 : 0.1),
-                new NoulAnswer(contains(text, OUTAGE_WORDS) ? 0.9 : 0.1));
+                new NoulAnswer(contains(text, OUTAGE_WORDS) ? 0.9 : 0.1),
+                new NoulAnswer(looksIntelligible(text) ? 0.9 : 0.1));
     }
 
     @Override
@@ -118,6 +119,16 @@ public class FakeDecisionProvider implements DecisionProvider {
             probabilities.put(i, i == level ? 0.6 : 0.1);
         }
         return new ScoreAnswer(level, URGENCY_LEVELS, probabilities);
+    }
+
+    /**
+     * Heurística tosca: un texto con varias palabras de largo razonable probablemente diga
+     * algo. No pretende detectar sinsentidos sutiles, solo el ruido evidente.
+     */
+    private static boolean looksIntelligible(String text) {
+        String[] words = text.split(" ");
+        long realWords = java.util.Arrays.stream(words).filter(word -> word.length() >= 3).count();
+        return realWords >= 4;
     }
 
     private static boolean contains(String text, List<String> needles) {

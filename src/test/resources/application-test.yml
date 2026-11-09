@@ -18,6 +18,8 @@ app:
       critical-noul: 0.7
       critical-urgency: 0.6
       sla-at-risk-window: PT30M
+      # Debajo de esto el ticket no se entiende y se le piden datos al cliente.
+      min-enough-information: 0.5
 
   security:
     jwt:

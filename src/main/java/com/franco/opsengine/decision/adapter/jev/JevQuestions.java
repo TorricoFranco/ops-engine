@@ -23,6 +23,7 @@ final class JevQuestions {
     static final String URGENCY = "urgency";
     static final String MULTIPLE_CUSTOMERS = "multiple_customers_affected";
     static final String SERVICE_UNAVAILABLE = "service_unavailable";
+    static final String ENOUGH_INFORMATION = "enough_information";
 
     /** Los niveles de urgencia, descritos como situaciones para que cada uno se lea solo. */
     static final List<String> URGENCY_LEVELS = List.of(
@@ -80,6 +81,17 @@ final class JevQuestions {
                 Map.of(
                         "true", "El texto menciona varios clientes, cuentas o usuarios afectados.",
                         "false", "El texto describe el problema de una sola cuenta.")));
+
+        // Va aparte de skill_recognized porque son cosas distintas con respuestas distintas:
+        // un ticket que no entendemos necesita que le pidan datos al cliente, no que una
+        // persona lo lea para descubrir que no dice nada.
+        questions.put(ENOUGH_INFORMATION, JevRequest.Question.noul(
+                "¿`ticket` tiene información suficiente para que alguien pueda empezar a trabajarlo?",
+                Map.of(
+                        "true", "Se entiende qué le pasa al cliente, aunque falten detalles"
+                                + " que se puedan pedir después.",
+                        "false", "El texto no describe nada concreto: son caracteres sueltos,"
+                                + " una prueba, o una frase que no dice cuál es el problema.")));
 
         questions.put(SERVICE_UNAVAILABLE, JevRequest.Question.noul(
                 "¿`ticket` dice que un servicio está caído o no responde?",

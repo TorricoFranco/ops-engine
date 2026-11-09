@@ -93,6 +93,16 @@ public class Ticket {
         this.reviewReason = cleanReason;
     }
 
+    /**
+     * El texto no alcanza para trabajarlo. Se le pide más información al cliente en lugar de
+     * ocupar a una persona para que descubra que el ticket no dice nada.
+     */
+    public void requestMoreInformation(String reason) {
+        String cleanReason = requireText(reason, "reason");
+        transitionTo(TicketStatus.INFORMACION_INSUFICIENTE);
+        this.reviewReason = cleanReason;
+    }
+
     public void startWork() {
         transitionTo(TicketStatus.EN_PROGRESO);
     }

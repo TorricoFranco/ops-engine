@@ -51,6 +51,7 @@ Estado: planificación. No hay código todavía.
 ```
 NUEVO → EVALUANDO → ASIGNADO → EN_PROGRESO → RESUELTO → CERRADO
                  ↘ REVISION_REQUERIDA → ASIGNADO (o CERRADO)
+                 ↘ INFORMACION_INSUFICIENTE → EVALUANDO (o CERRADO)
 ```
 
 Las transiciones inválidas se rechazan en el dominio, no en el controlador.
@@ -64,6 +65,7 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 - **RF-05** Combinar la IA con datos duros: el vencimiento real del SLA puede pesar más que la urgencia que expresa el texto. Esto se define como regla explícita.
 - **RF-06** Asignación con control de concurrencia (optimistic locking) y evento en el outbox.
 - **RF-07** Fallback: si el proveedor falla o hace timeout, el ticket pasa a `REVISION_REQUERIDA`. Nunca se pierde.
+- **RF-13** Si el texto no alcanza para entender el problema, el ticket pasa a `INFORMACION_INSUFICIENTE` y se le piden datos al cliente. No consume tiempo de una persona: la revisión es para lo dudoso, no para el ruido.
 - **RF-08** Bandeja de revisión: el supervisor asigna o corrige, y registra el motivo cuando no está de acuerdo con la IA.
 - **RF-09** Auditoría reproducible de cada decisión: versión de reglas, entrada resumida, salida del proveedor y acción.
 - **RF-10** Evaluación offline: dataset etiquetado, con reporte de precisión, tasa de revisión e impacto en SLA.

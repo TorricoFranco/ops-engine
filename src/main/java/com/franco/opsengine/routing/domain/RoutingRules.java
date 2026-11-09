@@ -27,6 +27,16 @@ public final class RoutingRules {
                                         Duration timeToSlaDeadline,
                                         RoutingPolicy policy) {
 
+        // Se mira primero: sin entender el ticket, cualquier otra respuesta sería ruido.
+        if (!judgement.enoughInformation().isYes(policy.minEnoughInformation())) {
+            return new RoutingOutcome.RequestMoreInformation(
+                    "el ticket no describe el problema con suficiente detalle (%.2f < %.2f)"
+                            .formatted(judgement.enoughInformation().probability(),
+                                    policy.minEnoughInformation()),
+                    List.of(),
+                    policy.version());
+        }
+
         if (!judgement.skillRecognized().isYes(policy.minSkillRecognized())) {
             return review(ReviewReason.SKILL_NOT_RECOGNIZED, policy,
                     "el ticket no parece corresponder a ninguna competencia del equipo (%.2f < %.2f)"

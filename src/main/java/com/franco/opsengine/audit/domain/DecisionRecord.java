@@ -39,7 +39,9 @@ public record DecisionRecord(
 
     public enum Outcome {
         ASSIGNED,
-        SENT_TO_REVIEW
+        SENT_TO_REVIEW,
+        /** El texto no alcanzaba: se le pidieron datos al cliente. */
+        NEEDS_MORE_INFORMATION
     }
 
     public DecisionRecord {
@@ -79,6 +81,10 @@ public record DecisionRecord(
                     UUID.randomUUID(), ticketId, provider, review.policyVersion(), judgement,
                     Outcome.SENT_TO_REVIEW, null, review.reason(), review.rationale(),
                     review.candidates(), latencyMs, decidedAt);
+            case RoutingOutcome.RequestMoreInformation more -> new DecisionRecord(
+                    UUID.randomUUID(), ticketId, provider, more.policyVersion(), judgement,
+                    Outcome.NEEDS_MORE_INFORMATION, null, null, more.rationale(),
+                    more.candidates(), latencyMs, decidedAt);
         };
     }
 

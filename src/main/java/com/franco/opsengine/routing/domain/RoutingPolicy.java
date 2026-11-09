@@ -18,6 +18,8 @@ import java.util.Objects;
  * @param criticalUrgency      urgencia normalizada (0 a 1) a partir de la cual el caso pesa
  * @param slaAtRiskWindow      si falta menos que esto para el vencimiento, el caso es crítico
  *                             aunque el modelo no lo vea urgente (RF-05)
+ * @param minEnoughInformation debajo de esto, el ticket no se entiende y se le piden datos al
+ *                             cliente en lugar de ocupar a una persona
  */
 public record RoutingPolicy(
         String version,
@@ -25,7 +27,8 @@ public record RoutingPolicy(
         double minSkillConfidence,
         double criticalNoul,
         double criticalUrgency,
-        Duration slaAtRiskWindow) {
+        Duration slaAtRiskWindow,
+        double minEnoughInformation) {
 
     public RoutingPolicy {
         Objects.requireNonNull(slaAtRiskWindow, "the SLA window is required");
@@ -36,6 +39,7 @@ public record RoutingPolicy(
         requireProbability(minSkillConfidence, "minSkillConfidence");
         requireProbability(criticalNoul, "criticalNoul");
         requireProbability(criticalUrgency, "criticalUrgency");
+        requireProbability(minEnoughInformation, "minEnoughInformation");
         if (slaAtRiskWindow.isNegative()) {
             throw new IllegalArgumentException("the SLA window cannot be negative");
         }

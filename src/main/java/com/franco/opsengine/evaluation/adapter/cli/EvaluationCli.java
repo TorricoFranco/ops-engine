@@ -55,7 +55,7 @@ public final class EvaluationCli {
 
     /** Los mismos umbrales que trae application.yml por defecto. */
     private static final RoutingPolicy POLICY = new RoutingPolicy(
-            "2026-11-07.1", 0.7, 0.6, 0.7, 0.6, Duration.ofMinutes(30));
+            "2026-11-09.1", 0.7, 0.6, 0.7, 0.6, Duration.ofMinutes(30), 0.5);
 
     private EvaluationCli() {
     }
