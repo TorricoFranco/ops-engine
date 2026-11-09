@@ -16,13 +16,18 @@ import java.util.Objects;
  * @param urgency          posición en la escala de urgencia descrita al proveedor
  * @param multipleCustomersAffected probabilidad de que el texto indique más de un cliente afectado
  * @param serviceUnavailable        probabilidad de que el texto indique un servicio caído
+ * @param enoughInformation         probabilidad de que se entienda qué le pasa al cliente. Va
+ *                                  aparte de {@code skillRecognized} porque son problemas
+ *                                  distintos: uno es no saber a quién mandarlo, el otro es no
+ *                                  entender el texto, y cada uno se resuelve de otra manera
  */
 public record TicketJudgement(
         ChoiceAnswer requiredSkill,
         NoulAnswer skillRecognized,
         ScoreAnswer urgency,
         NoulAnswer multipleCustomersAffected,
-        NoulAnswer serviceUnavailable) {
+        NoulAnswer serviceUnavailable,
+        NoulAnswer enoughInformation) {
 
     public TicketJudgement {
         Objects.requireNonNull(requiredSkill, "required skill answer is missing");
@@ -30,6 +35,7 @@ public record TicketJudgement(
         Objects.requireNonNull(urgency, "urgency answer is missing");
         Objects.requireNonNull(multipleCustomersAffected, "multiple customers answer is missing");
         Objects.requireNonNull(serviceUnavailable, "service unavailable answer is missing");
+        Objects.requireNonNull(enoughInformation, "enough information answer is missing");
     }
 
     public Skill suggestedSkill() {

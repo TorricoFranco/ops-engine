@@ -12,7 +12,13 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 - Fase 3 completa: puerto `DecisionProvider`, `FakeDecisionProvider` determinista, adapter de Jev con reintentos y circuit breaker, y tests de contrato con WireMock. `mvn verify` pasa con 109 tests.
 - Fase 4 completa: reglas de ruteo con candidatos y motivos de descarte, asignación con optimistic locking, outbox transaccional y fallback a revisión. `mvn verify` pasa con 142 tests.
 - Fase 5 completa: auditoría append-only de cada decisión, bandeja de revisión, registro del desacuerdo humano y métricas de override. `mvn verify` pasa con 166 tests.
-- Próxima: fase 6, evaluación offline con dataset etiquetado. Fases en `docs/plan.md`, sección 8.
+- Fase 6 completa: evaluación offline que compara reparto por carga contra palabras clave más reglas, midiendo errores silenciosos. `mvn verify` pasa con 189 tests.
+- Áreas de soporte: cinco, incluida `ACCOUNT_MANAGEMENT` para consultas comerciales. Agregar una es una fila en una migración, no código.
+- Un ticket ilegible va a `INFORMACION_INSUFICIENTE` y se le piden datos al cliente: la revisión humana es para lo dudoso, no para el ruido.
+- El ruteo corre en un worker de fondo y la llamada al proveedor queda fuera de la transacción (ADR-010). Nunca poner `@Transactional` alrededor de una llamada de red.
+- Próxima: fase 7 (observabilidad) o fase 8 (frontend). Fases en `docs/plan.md`, sección 8.
+- La evaluación corre con `mvn spring-boot:run -Dspring-boot.run.arguments="--evaluate"`. No levanta Spring ni toca la base.
+- El dataset de evaluación lo etiqueta una persona, nunca el código: si saliera de las reglas del sistema, el resultado sería circular (ADR-009).
 - La IA da juicios, el código decide. Nunca preguntarle a Jev qué hacer con un ticket (ADR-005).
 - La aplicación corre en UTC (ADR-004). Los módulos se verifican con ArchUnit, no con Spring Modulith (ADR-002).
 - Skills propias en `.claude/skills/`: `adr-new` (crear ADRs) y `add-feature` (agregar funcionalidades con sus tests).

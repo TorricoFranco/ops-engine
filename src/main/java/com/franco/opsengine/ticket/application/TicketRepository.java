@@ -2,6 +2,7 @@ package com.franco.opsengine.ticket.application;
 
 import com.franco.opsengine.ticket.domain.Ticket;
 import com.franco.opsengine.ticket.domain.TicketId;
+import com.franco.opsengine.ticket.domain.TicketStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,4 +20,7 @@ public interface TicketRepository {
     Optional<Ticket> findByIdempotencyKey(String idempotencyKey);
 
     List<Ticket> findAll();
+
+    /** Los más viejos primero: el que lleva más esperando se atiende antes. */
+    List<Ticket> findByStatus(TicketStatus status, int limit);
 }

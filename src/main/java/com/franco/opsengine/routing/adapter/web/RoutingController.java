@@ -47,6 +47,9 @@ class RoutingController {
                 case RoutingOutcome.SendToReview review -> new RoutingResponse(
                         "SENT_TO_REVIEW", null, review.reason().name(),
                         review.rationale(), review.policyVersion(), candidates);
+                case RoutingOutcome.RequestMoreInformation more -> new RoutingResponse(
+                        "NEEDS_MORE_INFORMATION", null, null,
+                        more.rationale(), more.policyVersion(), candidates);
             };
         }
     }

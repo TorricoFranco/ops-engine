@@ -1,0 +1,34 @@
+# Dataset de evaluación. Copiar este archivo a dataset.csv y completar expected_skill.
+#
+# expected_skill es la competencia que DE VERDAD correspondía, según el criterio de alguien
+# que atendió soporte. No la que el sistema elegiría: si la etiqueta saliera de las mismas
+# reglas que se quieren medir, el motor acertaría siempre y el número no diría nada.
+#
+# Valores válidos: ACCESS_IDENTITY, BILLING, INTEGRATIONS, INFRASTRUCTURE, ACCOUNT_MANAGEMENT
+#
+# Los textos de abajo son un punto de partida. Agregá, cambiá y sobre todo sumá casos
+# difíciles: los que mezclan dos áreas, los ambiguos y los que no encajan en ninguna.
+# Apuntá a 30 o más; con menos, los porcentajes se mueven demasiado.
+#
+# Las descripciones con comas van entre comillas dobles.
+id,title,description,expected_skill
+EV-01,No puedo entrar al panel,"Desde ayer me rechaza la contraseña aunque la reseteé dos veces",
+EV-02,Cobros duplicados,"Nos llegaron dos facturas por el mismo mes y el importe se debitó dos veces",
+EV-03,El sitio no responde,"Hace veinte minutos que el panel devuelve error 500 para todo el equipo",
+EV-04,No llegan los pedidos nuevos,"El webhook de pedidos dejó de dispararse después de la última actualización",
+EV-05,Pedido de reembolso,"Quiero que me devuelvan el cargo del plan que cancelé el mes pasado",
+EV-06,Un usuario no ve el reporte,"A una persona del equipo le falta el permiso para abrir los reportes mensuales",
+EV-07,Sincronización desfasada,"Los productos que cargamos en nuestro sistema tardan horas en aparecer",
+EV-08,Todo lento,"Las pantallas tardan más de treinta segundos en cargar desde esta mañana",
+EV-09,Factura con datos mal,"La razón social que sale en la factura no es la nuestra",
+EV-10,Error al iniciar sesión con Google,"El botón de ingresar con Google devuelve una pantalla en blanco",
+EV-11,No puedo dar de alta a alguien,"Al invitar a un compañero nuevo dice que no tengo permisos suficientes",
+EV-12,Cargos que no reconozco,"Aparecen dos cobros chicos que no figuran en ningún plan contratado",
+EV-13,La API devuelve 503,"Nuestras llamadas a la API fallan de forma intermitente desde anoche",
+EV-14,Falta un pedido en el sistema,"Un pedido que entró por la integración no aparece en el panel",
+EV-15,Quiero cambiar el medio de pago,"Necesito pasar de tarjeta a transferencia para la próxima factura",
+EV-16,Sesión que se cierra sola,"Cada diez minutos me saca y tengo que volver a entrar",
+EV-17,"Lentitud al exportar","Exportar el listado de clientes tarda tanto que termina cortándose",
+EV-18,Token vencido,"La integración dejó de funcionar y el log dice que el token expiró",
+EV-19,Me cobraron de más,"El plan dice cien pero el débito fue de ciento cincuenta",
+EV-20,No puedo recuperar mi cuenta,"El mail de recuperación nunca llega a mi casilla",
