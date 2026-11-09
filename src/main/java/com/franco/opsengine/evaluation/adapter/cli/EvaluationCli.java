@@ -49,6 +49,8 @@ public final class EvaluationCli {
                 "Sincronización, webhooks y conexiones con sistemas externos.");
         CATALOG.put(new Skill("INFRASTRUCTURE"),
                 "Caídas del servicio, lentitud, errores del servidor y capacidad.");
+        CATALOG.put(new Skill("ACCOUNT_MANAGEMENT"),
+                "Planes, precios, contratación, cambios de medio de pago y datos de facturación.");
     }
 
     /** Los mismos umbrales que trae application.yml por defecto. */

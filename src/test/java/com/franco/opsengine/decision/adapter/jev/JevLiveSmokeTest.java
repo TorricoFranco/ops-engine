@@ -46,6 +46,8 @@ class JevLiveSmokeTest {
                 "Sincronización, webhooks y conexiones con sistemas externos.");
         CATALOG.put(new Skill("INFRASTRUCTURE"),
                 "Caídas del servicio, lentitud, errores del servidor y capacidad.");
+        CATALOG.put(new Skill("ACCOUNT_MANAGEMENT"),
+                "Planes, precios, contratación, cambios de medio de pago y datos de facturación.");
     }
 
     private static DecisionProvider provider() {
@@ -114,15 +116,17 @@ class JevLiveSmokeTest {
     }
 
     @Test
-    void aCommercialEnquiryIsNotATechnicalProblem() {
-        // Caso reservado: no se usó para ajustar la redacción de la pregunta. Si solo
-        // funcionara con el ejemplo contra el que se calibró, el criterio estaría sobreajustado.
+    void aCommercialEnquiryGoesToAccountManagement() {
+        // Antes de que existiera el área comercial, este caso servía para comprobar que el
+        // sistema sabía derivar lo que no le correspondía. Ahora sí le corresponde, así que
+        // lo que se verifica cambió: tiene que asignarse, no derivarse.
         TicketJudgement judgement = judgeAndReport("comercial",
                 "Quiero contratar un plan más grande",
                 "Necesito saber cómo paso al plan empresarial y qué incluye");
 
+        assertThat(judgement.suggestedSkill()).isEqualTo(new Skill("ACCOUNT_MANAGEMENT"));
         assertThat(judgement.skillRecognized().probability())
-                .as("una consulta comercial no es un problema técnico")
-                .isLessThan(NoulAnswer.DEFAULT_YES);
+                .as("una consulta comercial ya es un caso que el equipo atiende")
+                .isGreaterThanOrEqualTo(NoulAnswer.DEFAULT_YES);
     }
 }

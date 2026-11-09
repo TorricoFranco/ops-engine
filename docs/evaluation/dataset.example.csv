@@ -4,7 +4,7 @@
 # que atendió soporte. No la que el sistema elegiría: si la etiqueta saliera de las mismas
 # reglas que se quieren medir, el motor acertaría siempre y el número no diría nada.
 #
-# Valores válidos: ACCESS_IDENTITY, BILLING, INTEGRATIONS, INFRASTRUCTURE
+# Valores válidos: ACCESS_IDENTITY, BILLING, INTEGRATIONS, INFRASTRUCTURE, ACCOUNT_MANAGEMENT
 #
 # Los textos de abajo son un punto de partida. Agregá, cambiá y sobre todo sumá casos
 # difíciles: los que mezclan dos áreas, los ambiguos y los que no encajan en ninguna.

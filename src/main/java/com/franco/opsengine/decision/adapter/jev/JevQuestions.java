@@ -55,21 +55,21 @@ final class JevQuestions {
         // Un choice siempre elige una opción, incluso cuando ninguna encaja. Esta pregunta
         // detecta ese caso para que el ruteo lo mande a revisión en vez de forzar una.
         //
-        // La redacción se ajustó con llamadas reales. Con una pregunta vaga, una consulta de
-        // horarios daba 0,72, por encima del umbral: sigue siendo algo que un cliente le
-        // escribe a soporte. Pero preguntar por un "problema técnico" se pasaba al otro lado
-        // y dejaba afuera un cobro duplicado, que no es una falla del producto.
+        // La redacción se ajustó con llamadas reales. Pasó por tres versiones: una vaga, que
+        // dejaba entrar consultas de horarios con 0,72; una que preguntaba por un "problema
+        // técnico", que se pasaba al otro lado y dejaba afuera un cobro duplicado; y esta.
         //
-        // Lo que separa los dos casos es tener un problema concreto con el servicio frente a
-        // consultar algo sobre la empresa.
+        // Al agregarse el área comercial, lo comercial dejó de ser motivo de descarte: ahora
+        // lo que queda afuera es lo ajeno al soporte de este producto.
         questions.put(SKILL_RECOGNIZED, JevRequest.Question.noul(
-                "¿`ticket` plantea un problema concreto que atienda alguna de las áreas listadas?",
+                "¿`ticket` es un caso que atienda alguna de las áreas listadas?",
                 Map.of(
-                        "true", "El cliente tiene un problema con el servicio que ya contrató:"
-                                + " algo falla, le cobraron mal, o no puede acceder o usar algo.",
-                        "false", "Es una consulta general sobre la empresa, como horarios de"
-                                + " atención, datos de contacto, precios o cómo contratar; o es"
-                                + " un asunto de un área que no está entre las listadas.")));
+                        "true", "El cliente plantea algo sobre el servicio que alguna de esas"
+                                + " áreas resuelve: una falla, un cobro, un acceso, o una"
+                                + " consulta sobre su plan o su contratación.",
+                        "false", "Es un asunto ajeno al soporte de este producto, como una"
+                                + " postulación laboral, publicidad, o un reclamo sobre otra"
+                                + " empresa.")));
 
         questions.put(URGENCY, JevRequest.Question.score(
                 "¿Cuánto le impide operar al cliente lo que describe `ticket`?",
