@@ -25,7 +25,7 @@ function TicketDetail() {
   const id = String(useParams().id ?? "");
   const { data, error, loading } = useApi<[Ticket, Decision[], Employee[]]>(
     () => Promise.all([api.ticket(id), api.decisions(id), api.employees()]),
-    [id],
+    id,
   );
 
   if (loading) return <Loading />;

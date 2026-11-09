@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { clearSession, session, type Role } from "@/lib/api";
 
 const LINKS = [
@@ -11,13 +11,21 @@ const LINKS = [
   { href: "/review", label: "Revisión" },
 ];
 
+/** localStorage no emite eventos propios, y el rol solo cambia al entrar o salir. */
+const noSubscription = () => () => {};
+
 export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
-  const [role, setRole] = useState<Role | null>(null);
 
-  // El rol vive en localStorage, que no existe durante el render del servidor.
-  useEffect(() => setRole(session.role()), [pathname]);
+  // El rol vive en localStorage, que no existe durante el render del servidor. Se lee con
+  // useSyncExternalStore y no con un efecto: un efecto que llama a setState provoca un
+  // render en cascada, y acá el valor se puede leer directo al renderizar.
+  const role = useSyncExternalStore<Role | null>(
+    noSubscription,
+    () => session.role(),
+    () => null,
+  );
 
   if (pathname === "/login") {
     return null;
