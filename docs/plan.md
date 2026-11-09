@@ -103,12 +103,10 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 | 5. Revisión humana y auditoría | Bandeja de revisión, motivo de desacuerdo, auditoría completa |
 | 6. Evaluación offline | Dataset de 30 a 50 tickets, reporte, tasa de acuerdo IA-humano |
 | 7. Observabilidad | Dashboards y alertas en Grafana (ver `monitoring.md`) |
-| 8. Frontend | Next.js: lista de tickets, detalle con decisión, bandeja de revisión y panel de métricas |
+| 8. Frontend | Hecho. Next.js 16 con Tailwind: panel, tickets, detalle de la decisión y bandeja de revisión |
 | 9. Próximas fases | Módulos B y C |
 
-## 9. ADRs previstos
-
-**Escritos**
+## 9. ADRs
 - ADR-001: Spring Boot con Java 21 y Maven
 - ADR-002: Módulos por paquete verificados con ArchUnit, sin Spring Modulith
 - ADR-003: Autenticación con JWT propio y resource server
@@ -118,6 +116,8 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 - ADR-007: Optimistic locking con la versión en el aggregate
 - ADR-008: Auditoría de decisiones y registro del desacuerdo humano
 - ADR-009: Evaluación offline con dataset etiquetado a mano
+- ADR-010: El ruteo corre en segundo plano, fuera de la transacción
+- ADR-011: Una consola que explica el motor sin leer código
 
 ## 10. Riesgos
 
