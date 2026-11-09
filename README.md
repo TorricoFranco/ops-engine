@@ -2,7 +2,7 @@
 
 Motor de operaciones para soporte técnico: ruteo inteligente de tickets, revisión humana, auditoría y evaluación de decisiones. La IA (Jev, de TypeSafe AI) es un componente controlado: sus sugerencias pasan por reglas explícitas y nunca son la autorización final.
 
-> **Estado:** fase 6 completa (evaluación offline). Ver [plan del MVP](docs/plan.md).
+> **Estado:** MVP completo con consola web. Ver [plan del MVP](docs/plan.md).
 
 ## Stack
 
@@ -65,6 +65,7 @@ mvn verify
 - [ADR-008: Auditoría de decisiones y registro del desacuerdo humano](docs/adr/ADR-008-auditoria-de-decisiones.md)
 - [ADR-009: Evaluación offline con dataset etiquetado a mano](docs/adr/ADR-009-evaluacion-offline.md)
 - [ADR-010: El ruteo corre en segundo plano, fuera de la transacción](docs/adr/ADR-010-ruteo-asincrono.md)
+- [ADR-011: Una consola que explica el motor sin leer código](docs/adr/ADR-011-consola-de-operaciones.md)
 - [Cómo correr la evaluación](docs/evaluation/README.md)
 
 ## El papel de la IA
@@ -94,6 +95,27 @@ Por defecto el sistema usa un proveedor local sin red. Para usar Jev:
 ```bash
 DECISION_PROVIDER=jev TYPESAFE_API_KEY=... mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
+
+## La consola
+
+Un panel en Next.js que muestra cómo se decidió cada ticket, para entender el motor sin leer
+código. La pantalla de detalle está partida en dos: lo que estimó el modelo y lo que decidió
+el código, con cada candidato y su motivo de descarte.
+
+```bash
+docker compose up -d
+```
+
+```bash
+DECISION_PROVIDER=jev mvn spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+```bash
+npm --prefix frontend run dev
+```
+
+El panel queda en http://localhost:3000. El perfil `dev` crea diez tickets ya ruteados, así
+que hay algo que mirar desde el primer arranque.
 
 ## Evaluación
 
