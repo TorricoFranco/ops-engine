@@ -24,6 +24,8 @@
         <logstash-logback-encoder.version>9.0</logstash-logback-encoder.version>
         <resilience4j.version>2.4.0</resilience4j.version>
         <wiremock.version>3.13.2</wiremock.version>
+        <!-- Se limpia con -Dexcluded.test.groups= para poder correr el grupo `live`. -->
+        <excluded.test.groups>live</excluded.test.groups>
     </properties>
 
     <dependencies>
@@ -145,8 +147,9 @@
                     <!-- Los tests corren en UTC, igual que la aplicación (ver ADR-004). -->
                     <argLine>-Duser.timezone=UTC</argLine>
                     <!-- El grupo `live` llama a la API real de TypeSafe: no corre en CI ni en
-                         un build normal. Se lo pide a mano con -Dgroups=live. -->
-                    <excludedGroups>live</excludedGroups>
+                         un build normal. Para correrlo:
+                         mvn test -Dtest=JevLiveSmokeTest -Dexcluded.test.groups= -->
+                    <excludedGroups>${excluded.test.groups}</excludedGroups>
                 </configuration>
             </plugin>
         </plugins>

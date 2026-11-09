@@ -54,11 +54,22 @@ final class JevQuestions {
 
         // Un choice siempre elige una opción, incluso cuando ninguna encaja. Esta pregunta
         // detecta ese caso para que el ruteo lo mande a revisión en vez de forzar una.
+        //
+        // La redacción se ajustó con llamadas reales. Con una pregunta vaga, una consulta de
+        // horarios daba 0,72, por encima del umbral: sigue siendo algo que un cliente le
+        // escribe a soporte. Pero preguntar por un "problema técnico" se pasaba al otro lado
+        // y dejaba afuera un cobro duplicado, que no es una falla del producto.
+        //
+        // Lo que separa los dos casos es tener un problema concreto con el servicio frente a
+        // consultar algo sobre la empresa.
         questions.put(SKILL_RECOGNIZED, JevRequest.Question.noul(
-                "¿Lo que describe `ticket` corresponde a alguna de las competencias del equipo?",
+                "¿`ticket` plantea un problema concreto que atienda alguna de las áreas listadas?",
                 Map.of(
-                        "true", "El problema entra claramente en una de las áreas de soporte listadas.",
-                        "false", "El problema es de otra área, o el texto no alcanza para ubicarlo.")));
+                        "true", "El cliente tiene un problema con el servicio que ya contrató:"
+                                + " algo falla, le cobraron mal, o no puede acceder o usar algo.",
+                        "false", "Es una consulta general sobre la empresa, como horarios de"
+                                + " atención, datos de contacto, precios o cómo contratar; o es"
+                                + " un asunto de un área que no está entre las listadas.")));
 
         questions.put(URGENCY, JevRequest.Question.score(
                 "¿Cuánto le impide operar al cliente lo que describe `ticket`?",
