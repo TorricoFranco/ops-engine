@@ -102,7 +102,7 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 | 4. Ruteo y asignación | Reglas, umbrales, optimistic locking, outbox |
 | 5. Revisión humana y auditoría | Bandeja de revisión, motivo de desacuerdo, auditoría completa |
 | 6. Evaluación offline | Dataset de 30 a 50 tickets, reporte, tasa de acuerdo IA-humano |
-| 7. Observabilidad | Dashboards y alertas en Grafana (ver `monitoring.md`) |
+| 7. Observabilidad | Hecho. Actuator en un puerto aparte, métricas de ruteo, cola, revisión y outbox, tablero de Grafana y alertas versionadas |
 | 8. Frontend | Hecho. Next.js 16 con Tailwind: panel, tickets, detalle de la decisión y bandeja de revisión |
 | 9. Próximas fases | Módulos B y C |
 
@@ -118,6 +118,7 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 - ADR-009: Evaluación offline con dataset etiquetado a mano
 - ADR-010: El ruteo corre en segundo plano, fuera de la transacción
 - ADR-011: Una consola que explica el motor sin leer código
+- ADR-012: Métricas en un puerto aparte, con las consultas versionadas
 
 ## 10. Riesgos
 

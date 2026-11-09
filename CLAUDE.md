@@ -17,7 +17,10 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 - Un ticket ilegible va a `INFORMACION_INSUFICIENTE` y se le piden datos al cliente: la revisión humana es para lo dudoso, no para el ruido.
 - El ruteo corre en un worker de fondo y la llamada al proveedor queda fuera de la transacción (ADR-010). Nunca poner `@Transactional` alrededor de una llamada de red.
 - Fase 8 completa: consola de operaciones con panel, tickets, detalle de la decisión y bandeja de revisión. 12 tests de frontend.
-- Próxima: fase 7, observabilidad con Prometheus y Grafana. Fases en `docs/plan.md`, sección 8.
+- Fase 7 completa: Actuator en el puerto 9091, métricas propias de ruteo, cola, revisión y outbox, tablero de Grafana y alertas, todo versionado en `ops/`.
+- El MVP está cerrado. Lo que sigue son los módulos B y C, que estaban fuera de alcance. Fases en `docs/plan.md`, sección 8.
+- Las métricas no llevan texto de tickets. Son conteos, latencias y estados (RNF-04, ADR-012).
+- Una métrica nueva que alimente un panel necesita su assert en `PrometheusEndpointTest`: renombrar una serie tiene que romper el build, no vaciar un panel en silencio.
 - En la interfaz, los enums del dominio se traducen a castellano. Mostrar el enum crudo obliga a conocer el código para leer la pantalla.
 - La evaluación corre con `mvn spring-boot:run -Dspring-boot.run.arguments="--evaluate"`. No levanta Spring ni toca la base.
 - El dataset de evaluación lo etiqueta una persona, nunca el código: si saliera de las reglas del sistema, el resultado sería circular (ADR-009).
@@ -35,11 +38,11 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 
 ## Comandos
 
-- Levantar PostgreSQL: `docker compose up -d`
+- Levantar PostgreSQL, Prometheus y Grafana: `docker compose up -d`
 - Correr la app: `mvn spring-boot:run`
 - Build completo con tests: `mvn verify`. Es lo mismo que corre el CI. Correrlo antes de dar algo por terminado.
 - Frontend: `npm --prefix frontend run dev`, `npm --prefix frontend test`, `npm --prefix frontend run build`.
-- Demo completa: `docker compose up -d`, después la API con el perfil `dev` y `DECISION_PROVIDER=jev`, y el frontend en el 3000.
+- Demo completa: `docker compose up -d`, después la API con el perfil `dev` y `DECISION_PROVIDER=jev`, y el frontend en el 3000. Consola en el 3000, Grafana en el 3001, Prometheus en el 9090 y Actuator en el 9091.
 - Un solo test: `mvn -Dtest=NombreDeClase test`
 - Maven todavía no está en el PATH. Mientras tanto, usar `C:\Users\Franco\tools\apache-maven-3.9.16\bin\mvn`.
 

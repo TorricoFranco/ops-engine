@@ -74,6 +74,12 @@ app:
 
 
 management:
+  server:
+    # Puerto aparte del de la API. Las métricas no llevan datos personales, pero sí dicen
+    # cuántos tickets hay, qué tan atrás va el outbox y cuándo se cae el proveedor: es
+    # información de operación y no tiene por qué ser alcanzable desde donde se atiende al
+    # público. En el despliegue este puerto no se publica fuera de la red de monitoreo.
+    port: ${MANAGEMENT_PORT:9091}
   endpoints:
     web:
       exposure:

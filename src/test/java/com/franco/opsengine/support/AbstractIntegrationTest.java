@@ -37,6 +37,10 @@ public abstract class AbstractIntegrationTest {
     @Value("${local.server.port}")
     protected int port;
 
+    /** Actuator escucha aparte: health y métricas no se sirven por el puerto de la API. */
+    @Value("${local.management.port}")
+    protected int managementPort;
+
     @Autowired
     protected TestUserFactory users;
 
@@ -59,6 +63,14 @@ public abstract class AbstractIntegrationTest {
         jdbc.execute("DELETE FROM employee_skills");
         jdbc.execute("DELETE FROM employees");
         jdbc.execute("DELETE FROM teams");
+    }
+
+    protected RestClient managementClient() {
+        return RestClient.builder()
+                .baseUrl("http://localhost:" + managementPort)
+                .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
+                })
+                .build();
     }
 
     protected RestClient client() {
