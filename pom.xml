@@ -144,6 +144,9 @@
                 <configuration>
                     <!-- Los tests corren en UTC, igual que la aplicación (ver ADR-004). -->
                     <argLine>-Duser.timezone=UTC</argLine>
+                    <!-- El grupo `live` llama a la API real de TypeSafe: no corre en CI ni en
+                         un build normal. Se lo pide a mano con -Dgroups=live. -->
+                    <excludedGroups>live</excludedGroups>
                 </configuration>
             </plugin>
         </plugins>
