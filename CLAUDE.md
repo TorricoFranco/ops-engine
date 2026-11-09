@@ -13,6 +13,9 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 - Fase 4 completa: reglas de ruteo con candidatos y motivos de descarte, asignación con optimistic locking, outbox transaccional y fallback a revisión. `mvn verify` pasa con 142 tests.
 - Fase 5 completa: auditoría append-only de cada decisión, bandeja de revisión, registro del desacuerdo humano y métricas de override. `mvn verify` pasa con 166 tests.
 - Fase 6 completa: evaluación offline que compara reparto por carga contra palabras clave más reglas, midiendo errores silenciosos. `mvn verify` pasa con 189 tests.
+- Áreas de soporte: cinco, incluida `ACCOUNT_MANAGEMENT` para consultas comerciales. Agregar una es una fila en una migración, no código.
+- Un ticket ilegible va a `INFORMACION_INSUFICIENTE` y se le piden datos al cliente: la revisión humana es para lo dudoso, no para el ruido.
+- El ruteo corre en un worker de fondo y la llamada al proveedor queda fuera de la transacción (ADR-010). Nunca poner `@Transactional` alrededor de una llamada de red.
 - Próxima: fase 7 (observabilidad) o fase 8 (frontend). Fases en `docs/plan.md`, sección 8.
 - La evaluación corre con `mvn spring-boot:run -Dspring-boot.run.arguments="--evaluate"`. No levanta Spring ni toca la base.
 - El dataset de evaluación lo etiqueta una persona, nunca el código: si saliera de las reglas del sistema, el resultado sería circular (ADR-009).

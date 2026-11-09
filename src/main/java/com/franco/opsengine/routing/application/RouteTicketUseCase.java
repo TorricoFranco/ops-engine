@@ -24,7 +24,8 @@ import com.franco.opsengine.ticket.domain.TicketId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -53,11 +54,13 @@ public class RouteTicketUseCase {
     private final DecisionRecordRepository decisionLog;
     private final RoutingPolicy policy;
     private final Clock clock;
+    private final TransactionTemplate transactions;
 
     public RouteTicketUseCase(TicketRepository tickets, EmployeeRepository employees,
                               DecisionProvider decisions, SkillCatalog skills,
                               OutboxRepository outbox, DecisionRecordRepository decisionLog,
-                              RoutingPolicy policy, Clock clock) {
+                              RoutingPolicy policy, Clock clock,
+                              PlatformTransactionManager transactionManager) {
         this.tickets = tickets;
         this.employees = employees;
         this.decisions = decisions;
@@ -66,17 +69,41 @@ public class RouteTicketUseCase {
         this.decisionLog = decisionLog;
         this.policy = policy;
         this.clock = clock;
+        this.transactions = new TransactionTemplate(transactionManager);
     }
 
-    @Transactional
+    /**
+     * Deliberadamente sin {@code @Transactional}.
+     *
+     * <p>El juicio tarda entre 350 ms y el timeout, y pedirlo dentro de una transacción
+     * mantendría tomada una conexión de la base todo ese tiempo. Con volumen eso agota el
+     * pool: la base no estaría ocupada, solo esperando a un tercero.
+     *
+     * <p>Así que primero se lee, después se consulta al proveedor sin transacción, y recién
+     * al final se abre una para escribir. Si entre medio alguien más tocó el ticket, el
+     * optimistic locking hace fallar la escritura y este intento se descarta (ADR-010).
+     */
     public RoutingOutcome route(TicketId ticketId) {
         Ticket ticket = tickets.findById(ticketId).orElseThrow(() -> new TicketNotFoundException(ticketId));
-        ticket.startEvaluation();
 
         Instant now = clock.instant();
         long startedAt = System.nanoTime();
         Decided decided = judgeAndDecide(ticket, now);
         long latencyMs = (System.nanoTime() - startedAt) / 1_000_000;
+
+        // La transacción se abre acá y no antes, con el juicio ya en la mano. Es un template
+        // y no una anotación a propósito: anotar un método privado o llamado desde la misma
+        // clase no hace nada, porque el proxy de Spring no se entera.
+        return transactions.execute(status -> apply(ticketId, decided, latencyMs, now));
+    }
+
+    /**
+     * Escribe el resultado. Vuelve a leer el ticket para trabajar sobre su versión actual:
+     * entre la lectura inicial y este punto pasó una llamada a la red.
+     */
+    private RoutingOutcome apply(TicketId ticketId, Decided decided, long latencyMs, Instant now) {
+        Ticket ticket = tickets.findById(ticketId).orElseThrow(() -> new TicketNotFoundException(ticketId));
+        ticket.startEvaluation();
 
         RoutingOutcome outcome = decided.outcome();
         switch (outcome) {

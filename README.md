@@ -64,6 +64,7 @@ mvn verify
 - [ADR-007: Optimistic locking con la versión en el aggregate](docs/adr/ADR-007-optimistic-locking.md)
 - [ADR-008: Auditoría de decisiones y registro del desacuerdo humano](docs/adr/ADR-008-auditoria-de-decisiones.md)
 - [ADR-009: Evaluación offline con dataset etiquetado a mano](docs/adr/ADR-009-evaluacion-offline.md)
+- [ADR-010: El ruteo corre en segundo plano, fuera de la transacción](docs/adr/ADR-010-ruteo-asincrono.md)
 - [Cómo correr la evaluación](docs/evaluation/README.md)
 
 ## El papel de la IA

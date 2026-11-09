@@ -3,6 +3,8 @@ package com.franco.opsengine.ticket.adapter.persistence;
 import com.franco.opsengine.ticket.application.TicketRepository;
 import com.franco.opsengine.ticket.domain.Ticket;
 import com.franco.opsengine.ticket.domain.TicketId;
+import com.franco.opsengine.ticket.domain.TicketStatus;
+import org.springframework.data.domain.Limit;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
 
@@ -47,5 +49,12 @@ class TicketRepositoryAdapter implements TicketRepository {
     @Override
     public List<Ticket> findAll() {
         return jpa.findAll().stream().map(TicketMapper::toDomain).toList();
+    }
+
+    @Override
+    public List<Ticket> findByStatus(TicketStatus status, int limit) {
+        return jpa.findByStatusOrderByCreatedAtAsc(status, Limit.of(limit)).stream()
+                .map(TicketMapper::toDomain)
+                .toList();
     }
 }

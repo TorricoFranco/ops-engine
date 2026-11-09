@@ -56,6 +56,12 @@ app:
       # Debajo de esto el ticket no se entiende y se le piden datos al cliente.
       min-enough-information: 0.5
 
+    worker:
+      # Rutea en segundo plano. El endpoint de ruteo sigue existiendo para la demo.
+      enabled: true
+      interval-ms: 2000
+      batch-size: 25
+
   outbox:
     dispatcher:
       enabled: true
