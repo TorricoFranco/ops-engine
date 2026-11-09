@@ -107,7 +107,7 @@ GitHub rechaza cualquier push directo a `main`, incluido el del dueño del repos
 gh pr create --base main --head develop --fill
 ```
 
-La protección exige pull request, el check `build` en verde, y que la rama esté al día con `main`. No permite force push ni borrar la rama. Después de mergear, traer el resultado con `git switch main && git pull`.
+La protección exige pull request, los checks `backend` y `frontend` en verde, y que la rama esté al día con `main`. No permite force push ni borrar la rama. Después de mergear, traer el resultado con `git switch main && git pull`.
 
 No intentar `git push origin main`: siempre falla.
 
