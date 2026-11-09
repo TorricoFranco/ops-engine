@@ -21,6 +21,12 @@ El dataset se etiqueta a mano, con criterio de soporte. Si la etiqueta saliera d
 
 El lector falla con el número de línea cuando encuentra filas sin etiquetar, en lugar de saltearlas. Un dataset a medias daría un porcentaje que parece válido sobre la mitad de los casos.
 
+### El criterio se escribe antes de etiquetar
+
+Agregado después, al revisar el dataset: etiquetar a ojo no alcanza. Sin una regla escrita, dos tickets equivalentes terminan en áreas distintas según el día, y el porcentaje deja de medir al motor para medir la inconsistencia de quien etiquetó. Pasó: había dos casos que eran el mismo situación —una función del producto que falla técnicamente— y estaban etiquetados al revés.
+
+La regla quedó escrita en `docs/evaluation/README.md`: el ticket va al área dueña de la función donde aparece el problema, no al tipo de falla técnica. Los casos que la regla no resuelve están anotados uno por uno en el encabezado del dataset, con el motivo. Son tres, y se dejan adentro a propósito: un dataset donde todo es obvio hace quedar bien a cualquier estrategia.
+
 ### La métrica principal son los errores silenciosos
 
 Una asignación a quien no correspondía, que además no pasó por revisión. Es el error que nadie descubre.
