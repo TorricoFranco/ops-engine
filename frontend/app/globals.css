@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/*
+ * Tema oscuro fijo. Es una consola de operaciones: el contraste alto hace que las barras de
+ * probabilidad y los estados se lean de un vistazo, incluso en una captura chica.
+ */
+:root {
+  --bg: #0b0f17;
+  --surface: #121926;
+  --surface-raised: #1a2232;
+  --border: #243044;
+  --text: #e8edf5;
+  --text-muted: #8b9ab3;
+
+  --accent: #4f8cff;
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --danger: #f87171;
+  --model: #a78bfa;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border-subtle: var(--border);
+  --color-text-main: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-model: var(--model);
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+body {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Barras de probabilidad: la animación hace que el dato se lea como una medición. */
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.bar-fill {
+  transform-origin: left;
+  animation: grow 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
