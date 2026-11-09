@@ -12,6 +12,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
 
@@ -28,6 +29,20 @@ class GlobalExceptionHandler {
     ResponseEntity<ApiError> handleNotFound(RuntimeException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiError.of(404, "Not Found", e.getMessage()));
+    }
+
+    /**
+     * Una ruta que no existe.
+     *
+     * <p>Sin este handler el catch-all la convierte en 500, y un 500 manda a buscar el
+     * problema del lado del servidor cuando lo único que pasó es que la URL está mal. Se
+     * notó al mover Actuator a su propio puerto: pedir /actuator/health en el puerto de la
+     * API dejó de tener handler y la respuesta pasó a ser un error del servidor.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    ResponseEntity<ApiError> handleNoResource(NoResourceFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiError.of(404, "Not Found", "no existe esa ruta"));
     }
 
     /**

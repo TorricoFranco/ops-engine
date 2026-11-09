@@ -29,9 +29,13 @@ docker compose up -d
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-Health check: http://localhost:8080/actuator/health
-
 Documentación de la API: http://localhost:8080/swagger-ui.html
+
+Health check y métricas van por un puerto aparte, el 9091: son datos de operación y no se
+sirven junto con la API (ADR-012).
+
+- http://localhost:9091/actuator/health
+- http://localhost:9091/actuator/prometheus
 
 El perfil `dev` carga equipos y empleados de ejemplo, y crea los usuarios `agent`, `supervisor` y `admin`. La contraseña de desarrollo está en `DevUserSeeder` y esos usuarios no existen en ningún otro perfil.
 
@@ -66,6 +70,7 @@ mvn verify
 - [ADR-009: Evaluación offline con dataset etiquetado a mano](docs/adr/ADR-009-evaluacion-offline.md)
 - [ADR-010: El ruteo corre en segundo plano, fuera de la transacción](docs/adr/ADR-010-ruteo-asincrono.md)
 - [ADR-011: Una consola que explica el motor sin leer código](docs/adr/ADR-011-consola-de-operaciones.md)
+- [ADR-012: Métricas en un puerto aparte](docs/adr/ADR-012-observabilidad-con-prometheus.md)
 - [Cómo correr la evaluación](docs/evaluation/README.md)
 
 ## El papel de la IA
@@ -116,6 +121,23 @@ npm --prefix frontend run dev
 
 El panel queda en http://localhost:3000. El perfil `dev` crea diez tickets ya ruteados, así
 que hay algo que mirar desde el primer arranque.
+
+## Monitoreo
+
+`docker compose up -d` levanta también Prometheus y Grafana, con el tablero y las alertas
+versionados en `ops/`.
+
+- Grafana: http://localhost:3001 — tablero **ops-engine: motor de operaciones**, ya cargado.
+- Prometheus: http://localhost:9090
+
+El tablero tiene tres secciones: salud técnica (latencia y errores de la API), proveedor de
+juicios (latencia, fallas y circuit breaker) y negocio (decisiones por resultado, derivación
+a una persona, override humano y la cola abierta por estado).
+
+Las alertas viven en [`ops/prometheus/alerts.yml`](ops/prometheus/alerts.yml) y usan las
+mismas consultas que los paneles. Los umbrales son propuestas de `docs/monitoring.md`, no
+valores calibrados contra tráfico real. Prometheus las evalúa y las muestra, pero no hay
+Alertmanager: no se envían a ningún lado.
 
 ## Evaluación
 

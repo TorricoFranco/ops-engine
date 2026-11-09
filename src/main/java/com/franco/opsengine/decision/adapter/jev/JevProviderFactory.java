@@ -27,8 +27,16 @@ public final class JevProviderFactory {
     }
 
     public static DecisionProvider create(JevProperties properties) {
+        return create(properties, circuitBreaker());
+    }
+
+    /**
+     * Variante para cuando quien llama necesita el circuit breaker, por ejemplo para
+     * publicar su estado como métrica. La evaluación offline usa la otra.
+     */
+    public static DecisionProvider create(JevProperties properties, CircuitBreaker circuitBreaker) {
         return new JevDecisionProvider(
-                restClient(properties), properties, circuitBreaker(), retry(properties));
+                restClient(properties), properties, circuitBreaker, retry(properties));
     }
 
     /**

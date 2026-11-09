@@ -1,6 +1,7 @@
 package com.franco.opsengine.routing.adapter.scheduler;
 
 import com.franco.opsengine.routing.application.RouteTicketUseCase;
+import com.franco.opsengine.routing.application.RoutingMetrics;
 import com.franco.opsengine.ticket.application.TicketRepository;
 import com.franco.opsengine.ticket.domain.Ticket;
 import com.franco.opsengine.ticket.domain.TicketStatus;
@@ -31,12 +32,15 @@ public class RoutingWorker {
 
     private final TicketRepository tickets;
     private final RouteTicketUseCase routeTicket;
+    private final RoutingMetrics metrics;
     private final int batchSize;
 
     public RoutingWorker(TicketRepository tickets, RouteTicketUseCase routeTicket,
+                         RoutingMetrics metrics,
                          @Value("${app.routing.worker.batch-size:25}") int batchSize) {
         this.tickets = tickets;
         this.routeTicket = routeTicket;
+        this.metrics = metrics;
         this.batchSize = batchSize;
     }
 
@@ -48,11 +52,15 @@ public class RoutingWorker {
             } catch (OptimisticLockingFailureException e) {
                 // Otro lo tomó primero. No es un error: el ticket ya quedó resuelto.
                 log.debug("Ticket already routed by someone else ticketId={}", ticket.id().value());
+                metrics.routingFailed("optimistic_lock");
             } catch (RuntimeException e) {
                 // Queda en NUEVO y se reintenta en la próxima pasada. Si algo lo hace fallar
                 // siempre, se va a ver en el log y en la cantidad de pendientes.
                 log.error("Routing failed, leaving the ticket pending ticketId={}",
                         ticket.id().value(), e);
+                // Sin tope de reintentos: un ticket que falla siempre vuelve en cada pasada.
+                // Se ve como un contador que sube sin que baje la cola de pendientes.
+                metrics.routingFailed("unexpected");
             }
         }
     }

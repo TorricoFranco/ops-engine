@@ -1,0 +1,77 @@
+# Umbrales propuestos, no medidos: salen de docs/monitoring.md, sección 5. Con tráfico real
+# se ajustan. Están acá para que el proyecto muestre de qué se alerta y con qué consulta,
+# que es la parte que no cambia.
+groups:
+  - name: ops-engine
+    rules:
+      - alert: ApiLenta
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (rate(http_server_requests_seconds_bucket{application="ops-engine"}[5m]))
+          ) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: El p95 de la API pasa los 500 ms
+
+      - alert: ErroresDeLaApi
+        expr: |
+          sum(rate(http_server_requests_seconds_count{application="ops-engine",status=~"5.."}[5m]))
+          /
+          sum(rate(http_server_requests_seconds_count{application="ops-engine"}[5m]))
+          > 0.01
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Más del 1% de las respuestas son 5xx
+
+      - alert: ProveedorDeJuiciosCaido
+        # El circuito abierto significa que los tickets van derecho a revisión humana sin
+        # siquiera intentar la llamada.
+        expr: ops_decision_circuit_state{state="open"} == 1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: El circuit breaker hacia el proveedor lleva dos minutos abierto
+
+      - alert: DerivacionAltaARevision
+        expr: |
+          sum(rate(ops_routing_decisions_total{outcome="sent_to_review"}[15m]))
+          /
+          sum(rate(ops_routing_decisions_total[15m]))
+          > 0.3
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Más del 30% de las decisiones termina en una persona
+
+      - alert: ColaAtascada
+        # No alcanza con que haya pendientes: con tráfico siempre los hay. Lo que importa es
+        # que alguno lleve mucho esperando, que es la señal de que el worker dejó de avanzar.
+        expr: ops_tickets_pending_oldest_seconds > 900
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Hay un ticket sin rutear desde hace más de quince minutos
+
+      - alert: SlaEnRiesgo
+        expr: ops_tickets_sla_at_risk > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Hay tickets que vencen dentro de la ventana y siguen sin resolverse
+
+      - alert: OutboxAtrasado
+        expr: ops_outbox_pending > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: El outbox tiene eventos sin publicar desde hace cinco minutos
