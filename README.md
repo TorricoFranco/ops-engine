@@ -2,7 +2,7 @@
 
 Motor de operaciones para soporte técnico: ruteo inteligente de tickets, revisión humana, auditoría y evaluación de decisiones. La IA (Jev, de TypeSafe AI) es un componente controlado: sus sugerencias pasan por reglas explícitas y nunca son la autorización final.
 
-> **Estado:** fase 5 completa (revisión humana y auditoría). Ver [plan del MVP](docs/plan.md).
+> **Estado:** fase 6 completa (evaluación offline). Ver [plan del MVP](docs/plan.md).
 
 ## Stack
 
@@ -63,6 +63,8 @@ mvn verify
 - [ADR-006: Outbox transaccional en lugar de un broker](docs/adr/ADR-006-outbox-sin-broker.md)
 - [ADR-007: Optimistic locking con la versión en el aggregate](docs/adr/ADR-007-optimistic-locking.md)
 - [ADR-008: Auditoría de decisiones y registro del desacuerdo humano](docs/adr/ADR-008-auditoria-de-decisiones.md)
+- [ADR-009: Evaluación offline con dataset etiquetado a mano](docs/adr/ADR-009-evaluacion-offline.md)
+- [Cómo correr la evaluación](docs/evaluation/README.md)
 
 ## El papel de la IA
 
@@ -91,6 +93,18 @@ Por defecto el sistema usa un proveedor local sin red. Para usar Jev:
 ```bash
 DECISION_PROVIDER=jev TYPESAFE_API_KEY=... mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
+
+## Evaluación
+
+El motor se mide contra una línea base sobre un conjunto de casos etiquetados a mano:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.arguments="--evaluate"
+```
+
+La métrica principal son los **errores silenciosos**: asignaciones a quien no correspondía que
+además nadie mandó a revisar. Derivar a una persona tampoco es gratis, así que las dos cifras
+se leen juntas. Ver [docs/evaluation](docs/evaluation/README.md).
 
 ## Datos
 
