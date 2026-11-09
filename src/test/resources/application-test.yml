@@ -18,6 +18,15 @@ app:
       critical-noul: 0.7
       critical-urgency: 0.6
       sla-at-risk-window: PT30M
+      # Debajo de esto el ticket no se entiende y se le piden datos al cliente.
+      min-enough-information: 0.5
+
+    worker:
+      # Apagado por defecto: los tests que no son del worker rutean cuando quieren, y uno
+      # corriendo de fondo les cambiaría el estado de los tickets a mitad de camino.
+      enabled: false
+      interval-ms: 500
+      batch-size: 25
 
   security:
     jwt:

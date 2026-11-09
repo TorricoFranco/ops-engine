@@ -23,7 +23,7 @@ class RoutingRulesTest {
     private static final Skill ACCESS = new Skill("ACCESS_IDENTITY");
 
     private static final RoutingPolicy POLICY = new RoutingPolicy(
-            "test.1", 0.7, 0.6, 0.7, 0.6, Duration.ofMinutes(30));
+            "test.1", 0.7, 0.6, 0.7, 0.6, Duration.ofMinutes(30), 0.5);
 
     private static final Duration PLENTY_OF_TIME = Duration.ofHours(8);
 
@@ -33,13 +33,20 @@ class RoutingRulesTest {
 
     private static TicketJudgement judgement(double skillRecognized, double billingProbability,
                                              double urgencyLevel, double outage, double manyCustomers) {
+        return judgement(skillRecognized, billingProbability, urgencyLevel, outage, manyCustomers, 0.95);
+    }
+
+    private static TicketJudgement judgement(double skillRecognized, double billingProbability,
+                                             double urgencyLevel, double outage, double manyCustomers,
+                                             double enoughInformation) {
         return new TicketJudgement(
                 new ChoiceAnswer("BILLING", billingProbability,
                         Map.of("BILLING", billingProbability, "ACCESS_IDENTITY", 1 - billingProbability)),
                 new NoulAnswer(skillRecognized),
                 new ScoreAnswer(urgencyLevel, 5, Map.of((int) urgencyLevel, 1.0)),
                 new NoulAnswer(manyCustomers),
-                new NoulAnswer(outage));
+                new NoulAnswer(outage),
+                new NoulAnswer(enoughInformation));
     }
 
     /** Caso habitual: competencia clara, urgencia baja, nada raro. */
@@ -236,6 +243,39 @@ class RoutingRulesTest {
 
         assertThat(outcome.candidates().getFirst().rejection())
                 .contains(RejectionReason.INSUFFICIENT_CLEARANCE);
+    }
+
+    @Test
+    void anUnintelligibleTicketAsksTheCustomerForDetailsInsteadOfGoingToReview() {
+        // No es una derivación: no ocupa a una persona para que descubra que no dice nada.
+        RoutingOutcome outcome = RoutingRules.decide(
+                judgement(0.95, 0.9, 1, 0.05, 0.05, 0.1),
+                List.of(candidate(ANA, "Ana", BILLING, true, 0, 5, false)),
+                PLENTY_OF_TIME, POLICY);
+
+        assertThat(outcome).isInstanceOf(RoutingOutcome.RequestMoreInformation.class);
+        assertThat(outcome.rationale()).contains("detalle");
+    }
+
+    @Test
+    void anUnintelligibleTicketIsCheckedBeforeAnythingElse() {
+        // Si no se entiende el texto, la competencia que elija el modelo es ruido: no tiene
+        // sentido evaluar candidatos ni umbrales de confianza sobre eso.
+        RoutingOutcome outcome = RoutingRules.decide(
+                judgement(0.1, 0.2, 1, 0.05, 0.05, 0.1),
+                List.of(), PLENTY_OF_TIME, POLICY);
+
+        assertThat(outcome).isInstanceOf(RoutingOutcome.RequestMoreInformation.class);
+    }
+
+    @Test
+    void aTicketJustAboveTheInformationThresholdIsRouted() {
+        RoutingOutcome outcome = RoutingRules.decide(
+                judgement(0.95, 0.9, 1, 0.05, 0.05, 0.5),
+                List.of(candidate(ANA, "Ana", BILLING, true, 0, 5, false)),
+                PLENTY_OF_TIME, POLICY);
+
+        assertThat(outcome).isInstanceOf(RoutingOutcome.Assign.class);
     }
 
     @Test

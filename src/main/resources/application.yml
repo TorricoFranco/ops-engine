@@ -47,12 +47,20 @@ app:
     policy:
       # Cambiar cualquier umbral exige subir la versión: es lo que permite reconstruir
       # después con qué reglas se decidió un ticket viejo.
-      version: "2026-11-07.1"
+      version: "2026-11-09.1"
       min-skill-recognized: 0.7
       min-skill-confidence: 0.6
       critical-noul: 0.7
       critical-urgency: 0.6
       sla-at-risk-window: PT30M
+      # Debajo de esto el ticket no se entiende y se le piden datos al cliente.
+      min-enough-information: 0.5
+
+    worker:
+      # Rutea en segundo plano. El endpoint de ruteo sigue existiendo para la demo.
+      enabled: true
+      interval-ms: 2000
+      batch-size: 25
 
   outbox:
     dispatcher:

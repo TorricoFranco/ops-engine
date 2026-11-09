@@ -97,7 +97,8 @@ final class JevTestSupport {
                       "probabilities": {"0": 0.05, "1": 0.15, "2": 0.3, "3": 0.4, "4": 0.1}
                     },
                     "multiple_customers_affected": {"type": "noul", "noul": 0.71},
-                    "service_unavailable": {"type": "noul", "noul": 0.08}
+                    "service_unavailable": {"type": "noul", "noul": 0.08},
+                    "enough_information": {"type": "noul", "noul": 0.93}
                   },
                   "usage": {"input_tokens": 180, "output_tokens": 24}
                 }

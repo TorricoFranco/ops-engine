@@ -29,6 +29,20 @@ public sealed interface RoutingOutcome {
         }
     }
 
+    /**
+     * El texto no alcanza para trabajar el ticket. No es una derivación: no va a una persona,
+     * va de vuelta al cliente pidiéndole detalles.
+     */
+    record RequestMoreInformation(
+            String rationale,
+            List<CandidateEvaluation> candidates,
+            String policyVersion) implements RoutingOutcome {
+
+        public RequestMoreInformation {
+            candidates = List.copyOf(candidates);
+        }
+    }
+
     record SendToReview(
             ReviewReason reason,
             String rationale,

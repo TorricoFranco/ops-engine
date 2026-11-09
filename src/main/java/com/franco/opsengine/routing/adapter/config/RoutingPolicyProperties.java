@@ -26,7 +26,8 @@ class RoutingPolicyProperties {
             double minSkillConfidence,
             double criticalNoul,
             double criticalUrgency,
-            Duration slaAtRiskWindow) {
+            Duration slaAtRiskWindow,
+            double minEnoughInformation) {
     }
 
     @Bean
@@ -37,6 +38,7 @@ class RoutingPolicyProperties {
                 values.minSkillConfidence(),
                 values.criticalNoul(),
                 values.criticalUrgency(),
-                values.slaAtRiskWindow());
+                values.slaAtRiskWindow(),
+                values.minEnoughInformation());
     }
 }
