@@ -1,4 +1,12 @@
 # Perfil de tests. El datasource lo provee Testcontainers con @ServiceConnection.
+management:
+  server:
+    # Fijo y distinto del de desarrollo. No puede ser 0: el servidor de test también usa 0
+    # para pedir un puerto al azar, y Spring entiende que los dos ceros son el mismo puerto,
+    # con lo cual Actuator volvería a servirse junto con la API y el test que verifica la
+    # separación pasaría sin que la separación exista.
+    port: 19091
+
 spring:
   jpa:
     hibernate:

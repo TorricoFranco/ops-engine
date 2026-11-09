@@ -1,0 +1,10 @@
+apiVersion: 1
+
+providers:
+  - name: ops-engine
+    type: file
+    # Versionado en el repositorio y cargado al arrancar: un tablero que solo existe en el
+    # volumen de Grafana se pierde con el contenedor y no se puede revisar en un diff.
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards

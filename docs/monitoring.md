@@ -106,6 +106,20 @@ Los umbrales son propuestas. Se ajustan con datos reales.
 - Un test de integración que verifica que el log de una decisión incluye `traceId` y `decisionId`.
 - Capturas del dashboard en el README.
 
-## 7. Pregunta abierta
+## 7. Qué se implementó y qué no
 
-¿Incluimos Prometheus y Grafana en el Docker Compose desde el inicio, o recién en la fase 7?
+Resuelto en la fase 7 (ADR-012). Prometheus y Grafana entraron al Docker Compose recién acá, no desde el inicio: antes de la fase 5 no había casi nada que medir, y dos contenedores que nadie mira solo hacen más lento el arranque.
+
+**Implementado**
+- Actuator en un puerto propio, el 9091, con `/actuator/prometheus` sin credenciales porque ese puerto no se publica.
+- Los seis paneles de la sección 4.1, más la cola abierta por estado y el atraso del outbox.
+- Las ocho alertas de la sección 5, en `ops/prometheus/alerts.yml`.
+- Métricas propias: `ops_routing_decisions_total`, `ops_decision_judgement_seconds`, `ops_routing_failures_total`, `ops_decision_circuit_state`, `ops_tickets_*`, `ops_review_*` y `ops_outbox_pending`.
+
+**No implementado, a conciencia**
+- **Trazas.** Con un solo servicio, una traza por request no agrega sobre lo que ya dice el log.
+- **Alertmanager.** Las alertas se evalúan y se ven, pero no se envían a ningún lado.
+- **Loki o ELK.** Los logs siguen saliendo en JSON a stdout, sin backend de búsqueda.
+- **Las métricas de las secciones 4.2 E, F y G.** Base de datos, seguridad y calidad. Las dos primeras salen casi gratis de los binders que ya trae Actuator; la de calidad depende de correr la evaluación periódicamente, que hoy es manual.
+
+Los umbrales de la sección 5 siguen siendo propuestas. No hay tráfico real con el cual calibrarlos, y están así escritos en el archivo de alertas.

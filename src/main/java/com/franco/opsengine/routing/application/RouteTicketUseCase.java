@@ -28,18 +28,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
 /**
  * Rutea un ticket: pide el juicio, aplica las reglas y guarda el resultado.
  *
- * <p>Todo ocurre en una transacción, incluido el evento del outbox. Si el guardado falla, el
- * evento tampoco queda: no puede haber una asignación sin su evento.
- *
- * <p>La llamada al proveedor queda dentro de la transacción por simplicidad. Es aceptable
- * mientras el timeout esté acotado (10 s por defecto); si el volumen crece, el paso de
- * decisión debería salir de la transacción.
+ * <p>El juicio se pide fuera de la transacción y la escritura ocurre dentro de una sola,
+ * evento del outbox incluido: si el guardado falla, el evento tampoco queda, porque no puede
+ * haber una asignación sin su evento (ADR-010).
  */
 @Service
 public class RouteTicketUseCase {
@@ -54,12 +52,13 @@ public class RouteTicketUseCase {
     private final DecisionRecordRepository decisionLog;
     private final RoutingPolicy policy;
     private final Clock clock;
+    private final RoutingMetrics metrics;
     private final TransactionTemplate transactions;
 
     public RouteTicketUseCase(TicketRepository tickets, EmployeeRepository employees,
                               DecisionProvider decisions, SkillCatalog skills,
                               OutboxRepository outbox, DecisionRecordRepository decisionLog,
-                              RoutingPolicy policy, Clock clock,
+                              RoutingPolicy policy, Clock clock, RoutingMetrics metrics,
                               PlatformTransactionManager transactionManager) {
         this.tickets = tickets;
         this.employees = employees;
@@ -69,6 +68,7 @@ public class RouteTicketUseCase {
         this.decisionLog = decisionLog;
         this.policy = policy;
         this.clock = clock;
+        this.metrics = metrics;
         this.transactions = new TransactionTemplate(transactionManager);
     }
 
@@ -94,7 +94,12 @@ public class RouteTicketUseCase {
         // La transacción se abre acá y no antes, con el juicio ya en la mano. Es un template
         // y no una anotación a propósito: anotar un método privado o llamado desde la misma
         // clase no hace nada, porque el proxy de Spring no se entera.
-        return transactions.execute(status -> apply(ticketId, decided, latencyMs, now));
+        RoutingOutcome outcome = transactions.execute(status -> apply(ticketId, decided, latencyMs, now));
+
+        // Se cuenta después de escribir. Contar antes inflaría la tasa de asignación con
+        // intentos que el optimistic locking terminó descartando.
+        metrics.decided(outcome);
+        return outcome;
     }
 
     /**
@@ -120,15 +125,25 @@ public class RouteTicketUseCase {
         return outcome;
     }
 
+    private static Duration elapsedSince(long nanos) {
+        return Duration.ofNanos(System.nanoTime() - nanos);
+    }
+
     /** El resultado junto con el juicio que lo produjo, que puede no existir. */
     private record Decided(RoutingOutcome outcome, JudgementSnapshot judgement) {
     }
 
     private Decided judgeAndDecide(Ticket ticket, Instant now) {
         TicketJudgement judgement;
+        long askedAt = System.nanoTime();
         try {
             judgement = decisions.judge(new TicketContext(ticket.title(), ticket.description(), skills.all()));
+            metrics.judged(decisions.name(), elapsedSince(askedAt), true);
         } catch (DecisionUnavailableException e) {
+            // Se mide igual: una caída del proveedor que tarda diez segundos en fallar es un
+            // problema distinto de una que falla al instante, y el promedio de las respuestas
+            // buenas no lo muestra.
+            metrics.judged(decisions.name(), elapsedSince(askedAt), false);
             // RF-07: la falla no se convierte en un juicio. El ticket queda esperando a una
             // persona, y no se pierde.
             log.warn("Decision provider unavailable, sending the ticket to review ticketId={} reason={}",
