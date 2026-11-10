@@ -8,10 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
@@ -43,6 +47,36 @@ class GlobalExceptionHandler {
     ResponseEntity<ApiError> handleNoResource(NoResourceFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(ApiError.of(404, "Not Found", "no existe esa ruta"));
+    }
+
+    /**
+     * Pedidos que el cliente formó mal. Sin estos handlers el catch-all los convierte en 500,
+     * y quien lee un 500 busca un bug del servidor que no existe: el problema está en lo que
+     * mandó el cliente. El mensaje no expone la excepción de Spring: alcanza con decir qué
+     * corregir.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    ResponseEntity<ApiError> handleUnreadableBody(HttpMessageNotReadableException e) {
+        return ResponseEntity.badRequest()
+                .body(ApiError.of(400, "Bad Request", "el cuerpo de la petición no es un JSON válido"));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
+        return ResponseEntity.badRequest()
+                .body(ApiError.of(400, "Bad Request", "el parámetro \"" + e.getName() + "\" tiene un formato inválido"));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    ResponseEntity<ApiError> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(ApiError.of(405, "Method Not Allowed", "esa ruta no acepta ese método"));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    ResponseEntity<ApiError> handleMediaTypeNotSupported(HttpMediaTypeNotSupportedException e) {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(ApiError.of(415, "Unsupported Media Type", "el cuerpo tiene que enviarse como application/json"));
     }
 
     /**
