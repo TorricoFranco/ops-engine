@@ -21,6 +21,8 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 - El MVP está cerrado. Lo que sigue son los módulos B y C, que estaban fuera de alcance. Fases en `docs/plan.md`, sección 8.
 - Las métricas no llevan texto de tickets. Son conteos, latencias y estados (RNF-04, ADR-012).
 - Una métrica nueva que alimente un panel necesita su assert en `PrometheusEndpointTest`: renombrar una serie tiene que romper el build, no vaciar un panel en silencio.
+- Un enum del dominio que viaje por la API se publica como enum, nunca como `String` con `Enum::name`: el OpenAPI tiene que declarar los valores para que el frontend los tipe (ADR-013).
+- Dos DTOs no pueden compartir nombre simple. springdoc indexa por nombre y uno pisa al otro; si hace falta repetirlo, poner `@Schema(name = ...)`.
 - En la interfaz, los enums del dominio se traducen a castellano. Mostrar el enum crudo obliga a conocer el código para leer la pantalla.
 - La evaluación corre con `mvn spring-boot:run -Dspring-boot.run.arguments="--evaluate"`. No levanta Spring ni toca la base.
 - El dataset de evaluación lo etiqueta una persona, nunca el código: si saliera de las reglas del sistema, el resultado sería circular (ADR-009).
@@ -35,6 +37,7 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 - Tests: JUnit 5, AssertJ, Mockito, Testcontainers, WireMock, ArchUnit.
 - IA: TypeSafe Jev detrás del puerto `DecisionProvider`. Mientras no haya clave, usar `FakeDecisionProvider`.
 - Frontend en `frontend/`: Next.js 16, React 19, Tailwind 4 y TypeScript. Tests con Jest y React Testing Library. Sin shadcn/ui (ADR-011). Jest solo va en el frontend.
+- Los tipos del frontend se generan desde el OpenAPI (ADR-013). No escribirlos a mano en `lib/api.ts`.
 
 ## Comandos
 
@@ -42,6 +45,7 @@ Planes y decisiones viven en `docs/`. Si algo de este archivo contradice `docs/p
 - Correr la app: `mvn spring-boot:run`
 - Build completo con tests: `mvn verify`. Es lo mismo que corre el CI. Correrlo antes de dar algo por terminado.
 - Frontend: `npm --prefix frontend run dev`, `npm --prefix frontend test`, `npm --prefix frontend run build`.
+- Regenerar los tipos de la API: con la app corriendo, `npm --prefix frontend run types:api:fetch`. Commitear `frontend/openapi.json` junto con los tipos.
 - Demo completa: `docker compose up -d`, después la API con el perfil `dev` y `DECISION_PROVIDER=jev`, y el frontend en el 3000. Consola en el 3000, Grafana en el 3001, Prometheus en el 9090 y Actuator en el 9091.
 - Un solo test: `mvn -Dtest=NombreDeClase test`
 - Maven todavía no está en el PATH. Mientras tanto, usar `C:\Users\Franco\tools\apache-maven-3.9.16\bin\mvn`.

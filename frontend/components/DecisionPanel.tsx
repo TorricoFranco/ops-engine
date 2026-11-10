@@ -16,7 +16,7 @@ export function DecisionPanel({
   decision: Decision;
   employees: Employee[];
 }) {
-  const nameOf = (id: string | null) =>
+  const nameOf = (id: string | undefined) =>
     employees.find((employee) => employee.id === id)?.name ?? "—";
 
   return (
@@ -89,7 +89,7 @@ export function DecisionPanel({
           )}
           {decision.reviewReason && (
             <span className="text-sm text-[var(--text-muted)]">
-              {REVIEW_LABEL[decision.reviewReason] ?? decision.reviewReason}
+              {REVIEW_LABEL[decision.reviewReason]}
             </span>
           )}
         </div>
@@ -131,8 +131,7 @@ export function DecisionPanel({
                       <Badge tone="ok">elegible</Badge>
                     ) : (
                       <Badge>
-                        {REJECTION_LABEL[candidate.rejectionReason ?? ""] ??
-                          candidate.rejectionReason}
+                        {candidate.rejectionReason && REJECTION_LABEL[candidate.rejectionReason]}
                       </Badge>
                     )}
                   </span>

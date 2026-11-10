@@ -1,4 +1,9 @@
-import type { Decision, TicketStatus } from "@/lib/api";
+import type {
+  DecisionOutcome,
+  RejectionReason,
+  ReviewReason,
+  TicketStatus,
+} from "@/lib/api";
 import { Badge } from "./ui";
 
 const STATUS_LABEL: Record<TicketStatus, { text: string; tone: "ok" | "warn" | "danger" | "neutral" | "model" }> = {
@@ -13,28 +18,39 @@ const STATUS_LABEL: Record<TicketStatus, { text: string; tone: "ok" | "warn" | "
 };
 
 export function StatusBadge({ status }: { status: TicketStatus }) {
-  const { text, tone } = STATUS_LABEL[status] ?? { text: status, tone: "neutral" as const };
+  const { text, tone } = STATUS_LABEL[status];
   return <Badge tone={tone}>{text}</Badge>;
 }
 
-export const REJECTION_LABEL: Record<string, string> = {
+/**
+ * Los diccionarios están tipados sobre las uniones que salen del OpenAPI, no sobre
+ * `string`. Esa es la diferencia que importa: si el backend agrega un motivo, acá falta una
+ * clave y `tsc` falla. Con `Record<string, string>` compilaba igual y la pantalla mostraba
+ * el enum en inglés, que es el error que esto viene a evitar (ADR-013).
+ */
+export const REJECTION_LABEL: Record<RejectionReason, string> = {
   MISSING_SKILL: "no tiene la competencia",
   UNAVAILABLE: "no está disponible",
   AT_CAPACITY: "sin capacidad",
   INSUFFICIENT_CLEARANCE: "sin habilitación para críticos",
 };
 
-export const REVIEW_LABEL: Record<string, string> = {
+export const REVIEW_LABEL: Record<ReviewReason, string> = {
   PROVIDER_UNAVAILABLE: "el proveedor no respondió",
   SKILL_NOT_RECOGNIZED: "no corresponde a ninguna área",
   LOW_CONFIDENCE: "la competencia no supera el umbral",
   NO_ELIGIBLE_AGENT: "nadie cumple los requisitos",
 };
 
-export function OutcomeBadge({ outcome }: { outcome: Decision["outcome"] }) {
-  if (outcome === "ASSIGNED") return <Badge tone="ok">Asignado</Badge>;
-  if (outcome === "NEEDS_MORE_INFORMATION") return <Badge tone="warn">Faltan datos</Badge>;
-  return <Badge tone="warn">A revisión</Badge>;
+const OUTCOME_LABEL: Record<DecisionOutcome, { text: string; tone: "ok" | "warn" }> = {
+  ASSIGNED: { text: "Asignado", tone: "ok" },
+  NEEDS_MORE_INFORMATION: { text: "Faltan datos", tone: "warn" },
+  SENT_TO_REVIEW: { text: "A revisión", tone: "warn" },
+};
+
+export function OutcomeBadge({ outcome }: { outcome: DecisionOutcome }) {
+  const { text, tone } = OUTCOME_LABEL[outcome];
+  return <Badge tone={tone}>{text}</Badge>;
 }
 
 /** Cuánto falta para el SLA, en palabras. Negativo si ya venció. */
