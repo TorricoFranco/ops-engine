@@ -4,6 +4,10 @@ import com.franco.opsengine.routing.application.RouteTicketUseCase;
 import com.franco.opsengine.routing.domain.CandidateEvaluation;
 import com.franco.opsengine.routing.domain.RoutingOutcome;
 import com.franco.opsengine.ticket.domain.TicketId;
+import com.franco.opsengine.audit.domain.DecisionRecord;
+import com.franco.opsengine.routing.domain.RejectionReason;
+import com.franco.opsengine.routing.domain.ReviewReason;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -31,9 +35,9 @@ class RoutingController {
      * afuera y por qué motivo, y con qué versión de reglas se decidió.
      */
     record RoutingResponse(
-            String outcome,
+            DecisionRecord.Outcome outcome,
             UUID assigneeId,
-            String reviewReason,
+            ReviewReason reviewReason,
             String rationale,
             String policyVersion,
             List<CandidateView> candidates) {
@@ -42,23 +46,29 @@ class RoutingController {
             List<CandidateView> candidates = outcome.candidates().stream().map(CandidateView::from).toList();
             return switch (outcome) {
                 case RoutingOutcome.Assign assign -> new RoutingResponse(
-                        "ASSIGNED", assign.employeeId().value(), null,
+                        DecisionRecord.Outcome.ASSIGNED, assign.employeeId().value(), null,
                         assign.rationale(), assign.policyVersion(), candidates);
                 case RoutingOutcome.SendToReview review -> new RoutingResponse(
-                        "SENT_TO_REVIEW", null, review.reason().name(),
+                        DecisionRecord.Outcome.SENT_TO_REVIEW, null, review.reason(),
                         review.rationale(), review.policyVersion(), candidates);
                 case RoutingOutcome.RequestMoreInformation more -> new RoutingResponse(
-                        "NEEDS_MORE_INFORMATION", null, null,
+                        DecisionRecord.Outcome.NEEDS_MORE_INFORMATION, null, null,
                         more.rationale(), more.policyVersion(), candidates);
             };
         }
     }
 
+    /**
+     * El nombre del esquema es explícito porque la auditoría tiene otro record con el mismo
+     * nombre simple. springdoc indexa por nombre simple: sin esto, uno pisa al otro y el
+     * OpenAPI documenta uno de los dos endpoints con la forma del otro.
+     */
+    @Schema(name = "RoutingCandidateView")
     record CandidateView(
             UUID employeeId,
             String name,
             boolean eligible,
-            String rejectionReason,
+            RejectionReason rejectionReason,
             int openTickets,
             int maxOpenTickets) {
 
@@ -67,7 +77,7 @@ class RoutingController {
                     evaluation.employeeId().value(),
                     evaluation.employeeName(),
                     evaluation.eligible(),
-                    evaluation.rejection().map(Enum::name).orElse(null),
+                    evaluation.rejection().orElse(null),
                     evaluation.openTickets(),
                     evaluation.maxOpenTickets());
         }

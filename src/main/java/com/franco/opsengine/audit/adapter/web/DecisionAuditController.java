@@ -4,9 +4,12 @@ import com.franco.opsengine.audit.application.DecisionRecordRepository;
 import com.franco.opsengine.audit.domain.DecisionRecord;
 import com.franco.opsengine.audit.domain.JudgementSnapshot;
 import com.franco.opsengine.routing.domain.CandidateEvaluation;
+import com.franco.opsengine.routing.domain.RejectionReason;
+import com.franco.opsengine.routing.domain.ReviewReason;
 import com.franco.opsengine.shared.domain.EmployeeId;
 import com.franco.opsengine.ticket.domain.TicketId;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,14 +48,26 @@ class DecisionAuditController {
         }
     }
 
+    /**
+     * El motivo de descarte viaja como enum y no como String.
+     *
+     * <p>Jackson lo serializa con el mismo texto, así que el JSON no cambia, pero el OpenAPI
+     * pasa a declarar los valores posibles en lugar de "una cadena cualquiera". De eso
+     * dependen los tipos del frontend: con String, el generador produce `string` y agregar un
+     * motivo nuevo no rompe nada, solo deja la pantalla mostrando el enum crudo.
+     *
+     * <p>El nombre del esquema es explícito porque el ruteo tiene otro record con el mismo
+     * nombre simple, y springdoc indexa por nombre simple.
+     */
+    @Schema(name = "DecisionCandidateView")
     record CandidateView(
-            UUID employeeId, String name, boolean eligible, String rejectionReason,
+            UUID employeeId, String name, boolean eligible, RejectionReason rejectionReason,
             int openTickets, int maxOpenTickets) {
 
         static CandidateView from(CandidateEvaluation evaluation) {
             return new CandidateView(
                     evaluation.employeeId().value(), evaluation.employeeName(), evaluation.eligible(),
-                    evaluation.rejection().map(Enum::name).orElse(null),
+                    evaluation.rejection().orElse(null),
                     evaluation.openTickets(), evaluation.maxOpenTickets());
         }
     }
@@ -61,9 +76,9 @@ class DecisionAuditController {
             UUID id,
             String provider,
             String policyVersion,
-            String outcome,
+            DecisionRecord.Outcome outcome,
             UUID assignedEmployeeId,
-            String reviewReason,
+            ReviewReason reviewReason,
             String rationale,
             JudgementView judgement,
             List<CandidateView> candidates,
@@ -75,9 +90,9 @@ class DecisionAuditController {
                     record.id(),
                     record.provider(),
                     record.policyVersion(),
-                    record.outcome().name(),
+                    record.outcome(),
                     record.assignee().map(EmployeeId::value).orElse(null),
-                    record.review().map(Enum::name).orElse(null),
+                    record.review().orElse(null),
                     record.rationale(),
                     record.judgementSnapshot().map(JudgementView::from).orElse(null),
                     record.candidates().stream().map(CandidateView::from).toList(),

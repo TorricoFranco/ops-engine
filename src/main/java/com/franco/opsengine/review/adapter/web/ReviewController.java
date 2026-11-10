@@ -5,9 +5,11 @@ import com.franco.opsengine.review.application.ResolveReviewUseCase;
 import com.franco.opsengine.review.application.ReviewInbox;
 import com.franco.opsengine.review.application.ReviewMetrics;
 import com.franco.opsengine.review.domain.ReviewResolution;
+import com.franco.opsengine.routing.domain.ReviewReason;
 import com.franco.opsengine.shared.domain.EmployeeId;
 import com.franco.opsengine.ticket.domain.Ticket;
 import com.franco.opsengine.ticket.domain.TicketId;
+import com.franco.opsengine.ticket.domain.TicketStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -44,9 +46,9 @@ class ReviewController {
     record PendingView(
             UUID ticketId,
             String title,
-            String status,
+            TicketStatus status,
             Instant slaDeadline,
-            String reviewReason,
+            ReviewReason reviewReason,
             String rationale,
             String suggestedSkill,
             Double skillConfidence) {
@@ -57,9 +59,9 @@ class ReviewController {
             return new PendingView(
                     ticket.id().value(),
                     ticket.title(),
-                    ticket.status().name(),
+                    ticket.status(),
                     ticket.slaDeadline(),
-                    decision == null ? null : decision.review().map(Enum::name).orElse(null),
+                    decision == null ? null : decision.review().orElse(null),
                     decision == null ? null : decision.rationale(),
                     decision == null ? null : decision.judgementSnapshot()
                             .map(j -> j.suggestedSkill()).orElse(null),
@@ -139,9 +141,38 @@ class ReviewController {
                 request.disagreementReason()));
     }
 
+    /**
+     * Es el mismo contenido que {@link ReviewMetrics.Snapshot}, pero declarado acá.
+     *
+     * <p>Devolver el record de la capa de aplicación publicaba su nombre interno en el
+     * contrato: el OpenAPI traía un esquema llamado "Snapshot", y renombrar ese record
+     * habría cambiado la API sin que nadie lo notara.
+     *
+     * @param reviewRate   proporción que necesitó una persona
+     * @param overrideRate overrides sobre comparables. Nulo mientras no haya comparables: un
+     *                     cero inventado se leería como que el motor nunca se equivoca
+     */
+    record MetricsView(
+            long decisions,
+            long assigned,
+            long sentToReview,
+            Double reviewRate,
+            long resolutions,
+            long comparable,
+            long overrides,
+            Double overrideRate) {
+
+        static MetricsView from(ReviewMetrics.Snapshot snapshot) {
+            return new MetricsView(
+                    snapshot.decisions(), snapshot.assigned(), snapshot.sentToReview(),
+                    snapshot.reviewRate(), snapshot.resolutions(), snapshot.comparable(),
+                    snapshot.overrides(), snapshot.overrideRate());
+        }
+    }
+
     @GetMapping("/metrics")
     @Operation(summary = "Tasa de revisión y de desacuerdo con el sistema")
-    ReviewMetrics.Snapshot metrics() {
-        return metrics.snapshot();
+    MetricsView metrics() {
+        return MetricsView.from(metrics.snapshot());
     }
 }
