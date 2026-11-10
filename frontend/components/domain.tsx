@@ -2,6 +2,7 @@ import type {
   DecisionOutcome,
   RejectionReason,
   ReviewReason,
+  Skill,
   TicketStatus,
 } from "@/lib/api";
 import { Badge } from "./ui";
@@ -47,6 +48,17 @@ const OUTCOME_LABEL: Record<DecisionOutcome, { text: string; tone: "ok" | "warn"
   NEEDS_MORE_INFORMATION: { text: "Faltan datos", tone: "warn" },
   SENT_TO_REVIEW: { text: "A revisión", tone: "warn" },
 };
+
+/**
+ * Nombre de un área para la pantalla. Los nombres vienen de `GET /api/skills`: agregar un área
+ * es una fila en la base y no un cambio acá. Si el catálogo todavía no la trae, se muestra el
+ * código: queda a la vista y se corrige con la fila, en lugar de esconderse detrás de un texto
+ * inventado.
+ */
+export function skillName(skills: Skill[] | null, code: string | null | undefined): string {
+  if (!code) return "—";
+  return skills?.find((skill) => skill.code === code)?.name ?? code;
+}
 
 export function OutcomeBadge({ outcome }: { outcome: DecisionOutcome }) {
   const { text, tone } = OUTCOME_LABEL[outcome];

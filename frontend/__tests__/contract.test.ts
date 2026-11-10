@@ -39,6 +39,11 @@ describe("el contrato de la API y los textos de la pantalla", () => {
     expect(enumOf("DecisionView", "outcome")).toContain("NEEDS_MORE_INFORMATION");
   });
 
+  it("publica el catálogo de áreas con su nombre para la consola", () => {
+    expect(spec.components.schemas.SkillView.properties).toHaveProperty("name");
+    expect(spec.components.schemas.SkillView.properties).toHaveProperty("code");
+  });
+
   it("no mezcla los dos esquemas de candidatos", () => {
     // springdoc indexa por nombre simple: con los dos records llamados CandidateView, uno
     // pisaba al otro y el contrato describía un endpoint con la forma del otro.

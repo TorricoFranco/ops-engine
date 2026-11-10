@@ -1,22 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { api, type Employee, type PendingReview } from "@/lib/api";
+import { api, type Employee, type PendingReview, type Skill } from "@/lib/api";
 import { useApi } from "@/components/useApi";
 import { Badge, Card, Empty, ErrorNote, Loading } from "@/components/ui";
-import { REVIEW_LABEL, slaCountdown } from "@/components/domain";
+import { REVIEW_LABEL, skillName, slaCountdown } from "@/components/domain";
 import { ResolveForm } from "@/components/ResolveForm";
 
 export default function ReviewPage() {
-  const { data, error, loading, reload } = useApi<[PendingReview[], Employee[]]>(() =>
-    Promise.all([api.pendingReviews(), api.employees()]),
+  const { data, error, loading, reload } = useApi<[PendingReview[], Employee[], Skill[]]>(() =>
+    Promise.all([api.pendingReviews(), api.employees(), api.skills()]),
   );
 
   if (loading) return <Loading />;
   if (error) return <ErrorNote message={error} />;
   if (!data) return null;
 
-  const [pending, employees] = data;
+  const [pending, employees, skills] = data;
 
   return (
     <div className="space-y-6">
@@ -58,7 +58,7 @@ export default function ReviewPage() {
                   <div className="flex flex-col items-end gap-2 shrink-0">
                     {item.suggestedSkill && (
                       <Badge tone="model">
-                        sugirió {item.suggestedSkill}
+                        sugirió {skillName(skills, item.suggestedSkill)}
                         {item.skillConfidence != null &&
                           ` · ${Math.round(item.skillConfidence * 100)}%`}
                       </Badge>
@@ -82,6 +82,7 @@ export default function ReviewPage() {
                 <ResolveForm
                   ticketId={item.ticketId}
                   employees={employees}
+                  skills={skills}
                   hasSuggestion={item.suggestedSkill !== null}
                   onResolved={reload}
                 />

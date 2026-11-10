@@ -1,6 +1,6 @@
-import type { Decision, Employee } from "@/lib/api";
+import type { Decision, Employee, Skill } from "@/lib/api";
 import { Bar, Badge, Card, Mono } from "./ui";
-import { OutcomeBadge, REJECTION_LABEL, REVIEW_LABEL } from "./domain";
+import { OutcomeBadge, REJECTION_LABEL, REVIEW_LABEL, skillName } from "./domain";
 
 /**
  * La pantalla que explica el sistema.
@@ -12,9 +12,11 @@ import { OutcomeBadge, REJECTION_LABEL, REVIEW_LABEL } from "./domain";
 export function DecisionPanel({
   decision,
   employees,
+  skills,
 }: {
   decision: Decision;
   employees: Employee[];
+  skills: Skill[] | null;
 }) {
   const nameOf = (id: string | undefined) =>
     employees.find((employee) => employee.id === id)?.name ?? "—";
@@ -33,7 +35,7 @@ export function DecisionPanel({
                 Competencia elegida
               </span>
               <span className="font-mono text-sm text-[var(--model)]">
-                {decision.judgement.suggestedSkill}
+                {skillName(skills, decision.judgement.suggestedSkill)}
               </span>
             </div>
 

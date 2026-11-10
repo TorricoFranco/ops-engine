@@ -103,6 +103,10 @@ spring:
       on-profile: dev
   flyway:
     locations: classpath:db/migration,classpath:db/seed
+    # Las semillas de desarrollo están en V900. Una migración de esquema agregada después
+    # tiene un número menor, y en una base que ya tiene las semillas Flyway la rechaza como
+    # fuera de orden. Solo en dev: fuera de dev no hay semillas y el orden es el de siempre.
+    out-of-order: true
 
 app:
   security:
