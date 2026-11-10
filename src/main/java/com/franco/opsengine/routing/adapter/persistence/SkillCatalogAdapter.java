@@ -22,4 +22,11 @@ class SkillCatalogAdapter implements SkillCatalog {
         jpa.findAll().forEach(entity -> catalog.put(new Skill(entity.getCode()), entity.getDescription()));
         return catalog;
     }
+
+    @Override
+    public Map<Skill, String> displayNames() {
+        Map<Skill, String> names = new LinkedHashMap<>();
+        jpa.findAll().forEach(entity -> names.put(new Skill(entity.getCode()), entity.getDisplayName()));
+        return names;
+    }
 }

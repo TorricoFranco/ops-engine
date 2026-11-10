@@ -10,4 +10,10 @@ import java.util.Map;
 public interface SkillCatalog {
 
     Map<Skill, String> all();
+
+    /**
+     * El nombre que ve una persona en la consola. No es la descripción: esa es la que lee el
+     * modelo, y es más larga.
+     */
+    Map<Skill, String> displayNames();
 }

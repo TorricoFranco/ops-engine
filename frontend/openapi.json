@@ -492,6 +492,17 @@
         },
         "type": "object"
       },
+      "SkillView": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "TeamResponse": {
         "properties": {
           "id": {
@@ -828,6 +839,30 @@
         "summary": "Cierra un ticket en revisión sin asignarlo",
         "tags": [
           "Revisión humana"
+        ]
+      }
+    },
+    "/api/skills": {
+      "get": {
+        "operationId": "all_3",
+        "responses": {
+          "200": {
+            "content": {
+              "*/*": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SkillView"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          }
+        },
+        "summary": "Áreas de soporte con el nombre con el que se muestran",
+        "tags": [
+          "Áreas de soporte"
         ]
       }
     },

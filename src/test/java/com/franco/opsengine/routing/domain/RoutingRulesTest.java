@@ -122,6 +122,7 @@ class RoutingRulesTest {
                 List.of(candidate(ANA, "Ana", BILLING, true, 0, 5, false)), PLENTY_OF_TIME, POLICY);
 
         assertThat(((RoutingOutcome.SendToReview) outcome).reason()).isEqualTo(ReviewReason.LOW_CONFIDENCE);
+        assertThat(outcome.rationale()).doesNotContain("BILLING");
     }
 
     @Test
@@ -279,10 +280,21 @@ class RoutingRulesTest {
     }
 
     @Test
-    void theRationaleNamesTheAgentAndTheSkill() {
+    void theRationaleNamesTheAgentButNotTheSkillCode() {
+        // La consola traduce las áreas desde el catálogo. Un código metido en el texto no se
+        // traduce y aparecería en inglés en la pantalla.
         RoutingOutcome outcome = RoutingRules.decide(plainBillingTicket(),
                 List.of(candidate(ANA, "Ana", BILLING, true, 2, 5, false)), PLENTY_OF_TIME, POLICY);
 
-        assertThat(outcome.rationale()).contains("Ana").contains("BILLING");
+        assertThat(outcome.rationale()).contains("Ana").doesNotContain("BILLING");
+    }
+
+    @Test
+    void theReviewRationaleDoesNotNameTheSkillCodeEither() {
+        RoutingOutcome outcome = RoutingRules.decide(plainBillingTicket(),
+                List.of(candidate(ANA, "Ana", BILLING, false, 0, 5, false)), PLENTY_OF_TIME, POLICY);
+
+        assertThat(outcome).isInstanceOf(RoutingOutcome.SendToReview.class);
+        assertThat(outcome.rationale()).doesNotContain("BILLING");
     }
 }

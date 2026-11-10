@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { api, type Employee } from "@/lib/api";
+import { api, type Employee, type Skill } from "@/lib/api";
+import { skillName } from "./domain";
 
 /**
  * Resolver una revisión.
@@ -13,11 +14,13 @@ import { api, type Employee } from "@/lib/api";
 export function ResolveForm({
   ticketId,
   employees,
+  skills,
   hasSuggestion,
   onResolved,
 }: {
   ticketId: string;
   employees: Employee[];
+  skills: Skill[] | null;
   hasSuggestion: boolean;
   onResolved: () => void;
 }) {
@@ -65,7 +68,7 @@ export function ResolveForm({
           <option value="">Asignar a…</option>
           {available.map((employee) => (
             <option key={employee.id} value={employee.id}>
-              {employee.name} · {employee.skills.join(", ")} · {employee.openTickets}/
+              {employee.name} · {employee.skills.map((code) => skillName(skills, code)).join(", ")} · {employee.openTickets}/
               {employee.maxOpenTickets}
             </option>
           ))}

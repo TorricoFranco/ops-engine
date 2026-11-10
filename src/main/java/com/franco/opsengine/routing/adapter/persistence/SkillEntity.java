@@ -16,6 +16,9 @@ public class SkillEntity {
     @Column(nullable = false, length = 500)
     private String description;
 
+    @Column(name = "display_name", nullable = false, length = 60)
+    private String displayName;
+
     protected SkillEntity() {
         // requerido por JPA
     }
@@ -26,5 +29,9 @@ public class SkillEntity {
 
     String getDescription() {
         return description;
+    }
+
+    String getDisplayName() {
+        return displayName;
     }
 }

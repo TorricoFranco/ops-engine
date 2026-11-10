@@ -62,6 +62,9 @@ export type PendingReview = Present<
 /** Las tasas son cocientes: no hay número mientras el divisor sea cero. */
 export type Metrics = Present<Schemas["MetricsView"], "reviewRate" | "overrideRate">;
 
+/** Un área de soporte. `name` es el que se muestra; `code` es el que viaja en la API (ADR-014). */
+export type Skill = Required<Schemas["SkillView"]>;
+
 /**
  * Las uniones de valores, sacadas de los campos donde aparecen.
  *
@@ -153,6 +156,7 @@ export const api = {
   route: (id: string) => request<unknown>(`/api/tickets/${id}/routing`, { method: "POST" }),
 
   employees: () => request<Employee[]>("/api/employees"),
+  skills: () => request<Skill[]>("/api/skills"),
   pendingReviews: () => request<PendingReview[]>("/api/review"),
   metrics: () => request<Metrics>("/api/review/metrics"),
 

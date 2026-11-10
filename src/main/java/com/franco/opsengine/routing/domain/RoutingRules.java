@@ -46,8 +46,7 @@ public final class RoutingRules {
 
         if (!judgement.requiredSkill().isAtLeast(policy.minSkillConfidence())) {
             return review(ReviewReason.LOW_CONFIDENCE, policy,
-                    "la competencia %s no supera el umbral (%.2f < %.2f)".formatted(
-                            judgement.requiredSkill().value(),
+                    "la competencia del ticket no supera el umbral (%.2f < %.2f)".formatted(
                             judgement.requiredSkill().probabilityOf(judgement.requiredSkill().value()),
                             policy.minSkillConfidence()),
                     List.of());
@@ -66,16 +65,16 @@ public final class RoutingRules {
 
         if (eligible.isEmpty()) {
             return review(ReviewReason.NO_ELIGIBLE_AGENT, policy,
-                    "ningún empleado cumple los requisitos para %s%s".formatted(
-                            required.code(), critical ? " con habilitación para incidentes críticos" : ""),
+                    "ningún empleado cumple los requisitos para la competencia del ticket%s".formatted(
+                            critical ? " con habilitación para incidentes críticos" : ""),
                     evaluations);
         }
 
         CandidateEvaluation chosen = eligible.getFirst();
         return new RoutingOutcome.Assign(
                 chosen.employeeId(),
-                "%s tiene la competencia %s y es quien menos carga tiene (%d de %d)%s".formatted(
-                        chosen.employeeName(), required.code(),
+                "%s tiene la competencia del ticket y es quien menos carga tiene (%d de %d)%s".formatted(
+                        chosen.employeeName(),
                         chosen.openTickets(), chosen.maxOpenTickets(),
                         critical ? ", y está habilitado para incidentes críticos" : ""),
                 evaluations,

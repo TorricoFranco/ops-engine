@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { DecisionPanel } from "@/components/DecisionPanel";
-import type { Decision, Employee } from "@/lib/api";
+import type { Decision, Employee, Skill } from "@/lib/api";
+
+const SKILLS: Skill[] = [{ code: "INFRASTRUCTURE", name: "Infraestructura" }];
 
 const EMPLOYEES: Employee[] = [
   {
@@ -27,7 +29,7 @@ function decision(overrides: Partial<Decision> = {}): Decision {
     policyVersion: "2026-11-09.1",
     outcome: "ASSIGNED",
     assignedEmployeeId: "e1",
-    rationale: "Diego Ramírez tiene la competencia INFRASTRUCTURE",
+    rationale: "Diego Ramírez tiene la competencia del ticket y es quien menos carga tiene (2 de 4)",
     judgement: {
       suggestedSkill: "INFRASTRUCTURE",
       skillConfidence: 1,
@@ -62,7 +64,7 @@ function decision(overrides: Partial<Decision> = {}): Decision {
 
 describe("DecisionPanel", () => {
   it("muestra las probabilidades del modelo como porcentajes", () => {
-    render(<DecisionPanel decision={decision()} employees={EMPLOYEES} />);
+    render(<DecisionPanel decision={decision()} employees={EMPLOYEES} skills={SKILLS} />);
 
     expect(screen.getByText("Confianza en esa competencia")).toBeInTheDocument();
     expect(screen.getByText("100%")).toBeInTheDocument();
@@ -72,7 +74,7 @@ describe("DecisionPanel", () => {
   });
 
   it("nombra al empleado asignado en lugar de mostrar su id", () => {
-    render(<DecisionPanel decision={decision()} employees={EMPLOYEES} />);
+    render(<DecisionPanel decision={decision()} employees={EMPLOYEES} skills={SKILLS} />);
 
     // Aparece como asignado y otra vez en la lista de candidatos.
     expect(screen.getAllByText("Diego Ramírez").length).toBeGreaterThan(0);
@@ -81,14 +83,14 @@ describe("DecisionPanel", () => {
 
   it("explica en castellano por qué quedó afuera cada candidato", () => {
     // Mostrar el enum crudo obligaría a conocer el código para entender la pantalla.
-    render(<DecisionPanel decision={decision()} employees={EMPLOYEES} />);
+    render(<DecisionPanel decision={decision()} employees={EMPLOYEES} skills={SKILLS} />);
 
     expect(screen.getByText("sin habilitación para críticos")).toBeInTheDocument();
     expect(screen.queryByText("INSUFFICIENT_CLEARANCE")).not.toBeInTheDocument();
   });
 
   it("muestra la versión de reglas con la que se decidió", () => {
-    render(<DecisionPanel decision={decision()} employees={EMPLOYEES} />);
+    render(<DecisionPanel decision={decision()} employees={EMPLOYEES} skills={SKILLS} />);
 
     expect(screen.getByText(/2026-11-09\.1/)).toBeInTheDocument();
   });
@@ -104,6 +106,7 @@ describe("DecisionPanel", () => {
           candidates: [],
         })}
         employees={EMPLOYEES}
+        skills={SKILLS}
       />,
     );
 
@@ -114,9 +117,16 @@ describe("DecisionPanel", () => {
     ).toBeInTheDocument();
   });
 
+  it("muestra el nombre del área en lugar de su código", () => {
+    render(<DecisionPanel decision={decision()} employees={EMPLOYEES} skills={SKILLS} />);
+
+    expect(screen.getByText("Infraestructura")).toBeInTheDocument();
+    expect(screen.queryByText("INFRASTRUCTURE")).not.toBeInTheDocument();
+  });
+
   it("aclara que lo del modelo son estimaciones y no decisiones", () => {
     // Es la tesis del proyecto: si la pantalla no lo dice, se lee como que decidió la IA.
-    render(<DecisionPanel decision={decision()} employees={EMPLOYEES} />);
+    render(<DecisionPanel decision={decision()} employees={EMPLOYEES} skills={SKILLS} />);
 
     expect(screen.getByText(/Son estimaciones, no decisiones/)).toBeInTheDocument();
   });
