@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Suspense } from "react";
-import { api, type Decision, type Employee, type Ticket } from "@/lib/api";
+import { api, type Decision, type Employee, type Skill, type Ticket } from "@/lib/api";
 import { useApi } from "@/components/useApi";
 import { Badge, Card, Empty, ErrorNote, Loading, Mono } from "@/components/ui";
 import { DecisionPanel } from "@/components/DecisionPanel";
@@ -23,8 +23,8 @@ export default function TicketDetailPage() {
 
 function TicketDetail() {
   const id = String(useParams().id ?? "");
-  const { data, error, loading } = useApi<[Ticket, Decision[], Employee[]]>(
-    () => Promise.all([api.ticket(id), api.decisions(id), api.employees()]),
+  const { data, error, loading } = useApi<[Ticket, Decision[], Employee[], Skill[]]>(
+    () => Promise.all([api.ticket(id), api.decisions(id), api.employees(), api.skills()]),
     id,
   );
 
@@ -32,7 +32,7 @@ function TicketDetail() {
   if (error) return <ErrorNote message={error} />;
   if (!data) return null;
 
-  const [ticket, decisions, employees] = data;
+  const [ticket, decisions, employees, skills] = data;
   const sla = slaCountdown(ticket.slaDeadline);
   const latest = decisions[0];
 
@@ -74,7 +74,7 @@ function TicketDetail() {
       </header>
 
       {latest ? (
-        <DecisionPanel decision={latest} employees={employees} />
+        <DecisionPanel decision={latest} employees={employees} skills={skills} />
       ) : (
         <Empty>
           Todavía no se decidió nada sobre este ticket. El worker lo toma en la próxima pasada.

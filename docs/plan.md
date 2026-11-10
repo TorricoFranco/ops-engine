@@ -120,6 +120,8 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 - ADR-011: Una consola que explica el motor sin leer código
 - ADR-012: Métricas en un puerto aparte, con las consultas versionadas
 - ADR-013: Los tipos del frontend salen del OpenAPI, y el contrato publica enums
+- ADR-014: Cada área tiene un nombre en la base, y la regla no la nombra por código
+- ADR-015: Las semillas de desarrollo no bloquean las migraciones nuevas
 
 ## 10. Riesgos
 
