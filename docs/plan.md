@@ -119,6 +119,7 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 - ADR-010: El ruteo corre en segundo plano, fuera de la transacción
 - ADR-011: Una consola que explica el motor sin leer código
 - ADR-012: Métricas en un puerto aparte, con las consultas versionadas
+- ADR-013: Los tipos del frontend salen del OpenAPI, y el contrato publica enums
 
 ## 10. Riesgos
 

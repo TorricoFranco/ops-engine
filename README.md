@@ -71,6 +71,7 @@ mvn verify
 - [ADR-010: El ruteo corre en segundo plano, fuera de la transacción](docs/adr/ADR-010-ruteo-asincrono.md)
 - [ADR-011: Una consola que explica el motor sin leer código](docs/adr/ADR-011-consola-de-operaciones.md)
 - [ADR-012: Métricas en un puerto aparte](docs/adr/ADR-012-observabilidad-con-prometheus.md)
+- [ADR-013: Los tipos del frontend salen del OpenAPI](docs/adr/ADR-013-tipos-del-frontend-desde-openapi.md)
 - [Cómo correr la evaluación](docs/evaluation/README.md)
 
 ## El papel de la IA

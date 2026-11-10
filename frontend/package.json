@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "types:api": "openapi-typescript openapi.json -o lib/api.generated.ts",
+    "types:api:fetch": "node scripts/fetch-openapi.mjs && npm run types:api"
   },
   "dependencies": {
     "next": "16.4.5",
@@ -28,6 +30,7 @@
     "eslint-config-next": "16.4.5",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",
+    "openapi-typescript": "^7.9.1",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5"

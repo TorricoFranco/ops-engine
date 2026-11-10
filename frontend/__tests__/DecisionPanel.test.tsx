@@ -15,6 +15,11 @@ const EMPLOYEES: Employee[] = [
   },
 ];
 
+/**
+ * Los campos ausentes se omiten en lugar de ponerse en nulo: la API está configurada con
+ * `default-property-inclusion: non_null`, así que un campo sin valor no viaja. Escribir
+ * `null` acá probaba una respuesta que el backend nunca manda.
+ */
 function decision(overrides: Partial<Decision> = {}): Decision {
   return {
     id: "d1b2c3d4-0000-0000-0000-000000000000",
@@ -22,7 +27,6 @@ function decision(overrides: Partial<Decision> = {}): Decision {
     policyVersion: "2026-11-09.1",
     outcome: "ASSIGNED",
     assignedEmployeeId: "e1",
-    reviewReason: null,
     rationale: "Diego Ramírez tiene la competencia INFRASTRUCTURE",
     judgement: {
       suggestedSkill: "INFRASTRUCTURE",
@@ -38,7 +42,6 @@ function decision(overrides: Partial<Decision> = {}): Decision {
         employeeId: "e1",
         name: "Diego Ramírez",
         eligible: true,
-        rejectionReason: null,
         openTickets: 2,
         maxOpenTickets: 4,
       },
@@ -94,9 +97,9 @@ describe("DecisionPanel", () => {
     render(
       <DecisionPanel
         decision={decision({
-          judgement: null,
+          judgement: undefined,
           outcome: "SENT_TO_REVIEW",
-          assignedEmployeeId: null,
+          assignedEmployeeId: undefined,
           reviewReason: "PROVIDER_UNAVAILABLE",
           candidates: [],
         })}

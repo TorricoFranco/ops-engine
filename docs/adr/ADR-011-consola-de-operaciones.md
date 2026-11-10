@@ -47,7 +47,7 @@ Nada de comodín. La API responde con credenciales, y un comodín dejaría que c
 - Los textos de la interfaz traducen los enums del dominio, así que el vocabulario técnico no se filtra a quien usa el sistema.
 
 **Negativas**
-- **El vocabulario está duplicado.** Los nombres de estados y motivos viven en el backend como enums y en el frontend como diccionarios de traducción. Un motivo nuevo exige tocar los dos lados, y si se olvida, la pantalla muestra el enum crudo. Generar los tipos desde el OpenAPI resolvería la mitad del problema y queda pendiente.
+- ~~**El vocabulario está duplicado.**~~ Resuelto en el ADR-013: los tipos se generan desde el OpenAPI y los diccionarios de traducción son exhaustivos sobre esas uniones, así que un motivo nuevo sin traducir rompe el build. Los textos en castellano siguen viviendo en el frontend, que es donde corresponde.
 - **No hay tests de punta a punta.** Playwright estaba en el plan y no se hizo: los tests cubren componentes, no el flujo completo contra la API.
 - El panel recarga pidiendo todo de nuevo, sin caché ni actualización incremental. Con esta cantidad de datos no importa.
 - Es una segunda aplicación en el mismo repositorio, con su propio build y su propio job de CI.
