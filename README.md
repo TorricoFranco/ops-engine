@@ -4,6 +4,20 @@ Motor de operaciones para soporte técnico: ruteo inteligente de tickets, revisi
 
 > **Estado:** MVP completo con consola web. Ver [plan del MVP](docs/plan.md).
 
+## Capturas
+
+**La decisión, explicada.** A la izquierda, lo que estimó el modelo. A la derecha, lo que decidió el código y por qué cada candidato quedó o no quedó afuera.
+
+![Detalle de una decisión: lo que estimó el modelo y lo que decidió el código](docs/img/consola-decision.png)
+
+**El panel.** Lo que está esperando a una persona, lo que el sistema resolvió solo y el estado de cada SLA.
+
+![Panel de operaciones](docs/img/consola-panel.png)
+
+**El tablero.** Salud técnica, proveedor de juicios y negocio, con la cola abierta por estado. Las consultas son las mismas que usan las alertas de Prometheus.
+
+![Tablero de Grafana](docs/img/grafana-tablero.png)
+
 ## Stack
 
 - Java 21, Spring Boot 4.1.2, Maven
