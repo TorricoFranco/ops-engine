@@ -39,9 +39,41 @@ Copiá `dataset.example.csv` a `dataset.csv` y completá la columna `expected_sk
 criterio de alguien que atendió soporte. Si saliera de las mismas reglas que se quieren medir,
 el motor acertaría siempre y el resultado no diría nada.
 
-Conviene que haya casos difíciles: los que mezclan dos áreas, los ambiguos, y los que no
-encajan en ninguna competencia. Un dataset donde todo es obvio hace quedar bien a cualquier
-estrategia y no sirve para elegir entre ellas.
+### El criterio
+
+Etiquetar caso por caso, a ojo, no alcanza. Sin una regla escrita, dos tickets iguales
+terminan en áreas distintas según el día, y un porcentaje calculado sobre eso no mide al
+motor: mide la inconsistencia de quien etiquetó. Pasó en este dataset, con dos casos que eran
+el mismo y quedaron al revés.
+
+La regla es:
+
+> **El ticket va al área dueña de la función donde aparece el problema, no al tipo de falla
+> técnica.** `INFRASTRUCTURE` queda para lo que afecta a todo el sistema a la vez.
+
+| Ticket | Va a | Y no a | Por qué |
+|---|---|---|---|
+| La descarga de factura queda colgada | `BILLING` | `INFRASTRUCTURE` | La función es facturación; que la falla sea técnica no cambia quién la conoce |
+| Crear un usuario devuelve 500 | `ACCESS_IDENTITY` | `INFRASTRUCTURE` | Mismo caso que el anterior, y por eso la misma respuesta |
+| Todas las pantallas devuelven 500 | `INFRASTRUCTURE` | — | Acá sí: no hay una función afectada, están todas |
+
+Es como trabaja un helpdesk real. El ticket entra al equipo dueño de esa parte del producto,
+y si al mirarlo resulta ser infraestructura, ese equipo lo escala. Etiquetar por el tipo de
+error haría que infraestructura reciba casi todo, porque casi todo síntoma visible es técnico.
+
+### Casos que el criterio no resuelve
+
+Quedan tres, y están anotados en el encabezado de `dataset.csv` con el motivo. Vale dejarlos
+adentro: un dataset donde todo es obvio hace quedar bien a cualquier estrategia y no sirve
+para elegir entre ellas.
+
+- **Dos problemas en un ticket.** El criterio no dice cuál gana. Queda el que bloquea el uso.
+  En producción esto se parte en dos tickets, y el dataset no sabe representarlo.
+- **Causa y síntoma en áreas distintas.** Un webhook que devuelve 403 porque cambiaron un
+  permiso. Se etiqueta por donde aparece, que es lo que ve quien recibe el ticket.
+- **Lo que no entra en ninguna de las cinco áreas.** Una app móvil que se cierra al abrir no
+  es ninguna. Queda en `INFRASTRUCTURE` por descarte, y lo que eso señala no es una etiqueta
+  mal puesta sino un área que falta en el catálogo.
 
 Apuntá a 30 casos o más. Con menos, un acierto o un error mueven el porcentaje varios puntos.
 
