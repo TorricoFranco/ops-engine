@@ -101,13 +101,13 @@ leen juntas.
 2. **Palabras clave + reglas**, con el proveedor local. Mide cuánto alcanza con heurísticas.
 3. **Jev + reglas**, cuando haya clave. Mide cuánto suma el modelo por encima de lo anterior.
 
-La tercera todavía no está conectada: hace falta `TYPESAFE_API_KEY`. Si al sumarla la mejora
+La tercera se incluye cuando `TYPESAFE_API_KEY` está en el entorno; si no, se omite. Si al sumarla la mejora
 sobre la segunda resulta chica, ese también es un resultado, y hay que publicarlo igual.
 
 ## Una limitación conocida de la línea base
 
-El proveedor de palabras clave compara por subcadena, así que **es sensible al plural**:
-"contraseña" en el ticket no coincide con "contraseñas" en el catálogo, y el caso termina en
+El proveedor de palabras clave compara por subcadena, así que **es sensible a la forma de la palabra**:
+"contraseña" en el ticket no coincide con "contraseñas" en el catálogo, ni "me cobraron" con "cobros". El caso termina en
 revisión aunque sea claro para una persona.
 
 Eso hace que la línea base sea débil, y una línea base débil infla la mejora de cualquier cosa
@@ -131,3 +131,36 @@ Al leer el reporte, conviene mirar cuántos casos derivó la línea base por
 
 La calidad de la asignación dentro de la competencia correcta, el tiempo real de resolución y
 la satisfacción del cliente. Mide una cosa: si el ticket llegó a alguien que podía resolverlo.
+
+## Dataset de la primera corrida
+
+Los números de esta sección salen de 100 tickets sintéticos. No son tickets de un cliente real.
+
+- Los textos se escribieron en rol de diez usuarios distintos: una persona mayor, un comerciante, un estudiante, un contador, un cliente frustrado, un desarrollador, un adolescente, y usuarios de España y de México, entre otros. Hay 20 tickets por área.
+- Nueve son casos difíciles, de tres tipos: dos problemas en un mensaje, causa y síntoma en áreas distintas, y algo que no entra en las cinco áreas.
+- Los etiquetó a mano una persona que no vio la intención con la que se escribió cada texto. La intención se guardó aparte y no se usó como etiqueta.
+- Una segunda persona etiquetó 15 de los 100, sin ver las etiquetas previas. Coincidieron en 15 de 15.
+- El dataset no está en el repositorio.
+
+## Resultados de la primera corrida
+
+Corrida del 11 de noviembre de 2026, con `--dataset` apuntando a la hoja etiquetada.
+
+| Estrategia | Aciertos | Errores silenciosos | A revisión | Precisión al asignar |
+|---|---|---|---|---|
+| Reparto por carga | 21 (21%) | 79 (79%) | 0 | 21% |
+| Palabras clave + reglas | 1 (1%) | 0 | 99 (99%) | 100% (con una sola asignación) |
+| Jev + reglas | 95 (95%) | 2 (2%) | 3 (3%) | 98% |
+
+- Jev acierta 95 de 100. Con 100 casos, el intervalo de confianza del 95% va de 89% a 98%.
+- Los dos errores silenciosos son distintos. Uno es un texto ambiguo, que no dice qué función falla. El otro es un caso de causa y síntoma: el modelo ruteó por la causa (un cambio de permisos) y el criterio lo manda a donde aparece el problema (la descarga de facturas).
+- Causa y síntoma es lo más débil: de tres casos, ninguno se asignó bien. Los tres casos de dos problemas salieron bien.
+- Sin los tres casos de frontera, Jev acierta 93 de 97. El resultado no depende de ellos.
+- La línea base de palabras clave casi no decide: 99 tickets quedaron a revisión, 61 de ellos sin ninguna coincidencia. Por eso la diferencia de 94 puntos con Jev está exagerada, como advierte la sección sobre la línea base. La línea base no se cambió después de ver estos resultados.
+
+## Límites de este resultado
+
+- Los textos son sintéticos y más prototípicos que los reales. Con tickets reales, el acuerdo y la precisión van a ser más bajos.
+- El acuerdo entre personas se midió en 15 casos. Con tan pocos, el intervalo es amplio: de 80% a 100%.
+- Estos 100 son el set de prueba. Si se ajustan el prompt de Jev o las reglas mirando estos casos, el resultado deja de medir algo. Cualquier cambio se valida con tickets nuevos.
+- Es una sola corrida. Con 100 casos, un ticket de más o de menos mueve el porcentaje en un punto.
