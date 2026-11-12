@@ -103,7 +103,6 @@ Los umbrales son propuestas. Se ajustan con datos reales.
 ## 6. Cómo se ve en el portfolio
 
 - Un dashboard de Grafana con tres secciones: salud técnica, IA y negocio.
-- Un test de integración que verifica que el log de una decisión incluye `traceId` y `decisionId`.
 - Capturas del dashboard en el README.
 
 ## 7. Qué se implementó y qué no
@@ -120,6 +119,7 @@ Resuelto en la fase 7 (ADR-012). Prometheus y Grafana entraron al Docker Compose
 - **Trazas.** Con un solo servicio, una traza por request no agrega sobre lo que ya dice el log.
 - **Alertmanager.** Las alertas se evalúan y se ven, pero no se envían a ningún lado.
 - **Loki o ELK.** Los logs siguen saliendo en JSON a stdout, sin backend de búsqueda.
+- **Correlación en el log (pendiente, no deliberado).** La configuración de logback incluye `requestId`, `traceId`, `ticketId` y `decisionId` como campos del MDC, pero ningún código los carga todavía, así que salen vacíos. Cargar `requestId` desde un filtro HTTP es el primer paso. `traceId` depende de las trazas, que no están.
 - **Las métricas de las secciones 4.2 E, F y G.** Base de datos, seguridad y calidad. Las dos primeras salen casi gratis de los binders que ya trae Actuator; la de calidad depende de correr la evaluación periódicamente, que hoy es manual.
 
 Los umbrales de la sección 5 siguen siendo propuestas. No hay tráfico real con el cual calibrarlos, y están así escritos en el archivo de alertas.
