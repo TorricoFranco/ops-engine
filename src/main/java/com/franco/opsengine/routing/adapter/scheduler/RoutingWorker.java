@@ -34,14 +34,17 @@ public class RoutingWorker {
     private final RouteTicketUseCase routeTicket;
     private final RoutingMetrics metrics;
     private final int batchSize;
+    private final int maxAttempts;
 
     public RoutingWorker(TicketRepository tickets, RouteTicketUseCase routeTicket,
                          RoutingMetrics metrics,
-                         @Value("${app.routing.worker.batch-size:25}") int batchSize) {
+                         @Value("${app.routing.worker.batch-size:25}") int batchSize,
+                         @Value("${app.routing.worker.max-attempts:5}") int maxAttempts) {
         this.tickets = tickets;
         this.routeTicket = routeTicket;
         this.metrics = metrics;
         this.batchSize = batchSize;
+        this.maxAttempts = maxAttempts;
     }
 
     @Scheduled(fixedDelayString = "${app.routing.worker.interval-ms:2000}")
@@ -54,14 +57,21 @@ public class RoutingWorker {
                 log.debug("Ticket already routed by someone else ticketId={}", ticket.id().value());
                 metrics.routingFailed("optimistic_lock");
             } catch (RuntimeException e) {
-                // Queda en NUEVO y se reintenta en la próxima pasada. Si algo lo hace fallar
-                // siempre, se va a ver en el log y en la cantidad de pendientes.
-                log.error("Routing failed, leaving the ticket pending ticketId={}",
-                        ticket.id().value(), e);
-                // Sin tope de reintentos: un ticket que falla siempre vuelve en cada pasada.
-                // Se ve como un contador que sube sin que baje la cola de pendientes.
+                // Queda en NUEVO y la próxima pasada lo reintenta, hasta agotar el tope (ADR-016).
+                log.error("Routing failed ticketId={}", ticket.id().value(), e);
                 metrics.routingFailed("unexpected");
+                recordFailure(ticket, e);
             }
+        }
+    }
+
+    private void recordFailure(Ticket ticket, RuntimeException cause) {
+        try {
+            routeTicket.recordFailedAttempt(ticket.id(), cause.getClass().getSimpleName(), maxAttempts);
+        } catch (RuntimeException recordError) {
+            // Si registrar el intento también falla (por ejemplo, la base no responde), el ticket
+            // queda en NUEVO y se intenta de nuevo en la próxima pasada.
+            log.error("Could not record the failed attempt ticketId={}", ticket.id().value(), recordError);
         }
     }
 }

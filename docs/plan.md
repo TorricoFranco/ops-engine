@@ -122,6 +122,7 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 - ADR-013: Los tipos del frontend salen del OpenAPI, y el contrato publica enums
 - ADR-014: Cada área tiene un nombre en la base, y la regla no la nombra por código
 - ADR-015: Las semillas de desarrollo no bloquean las migraciones nuevas
+- ADR-016: Tope de reintentos del ruteo: un ticket que falla siempre pasa a revisión humana
 
 ## 10. Riesgos
 

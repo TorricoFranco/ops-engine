@@ -286,7 +286,7 @@ export interface components {
             provider?: string;
             rationale?: string;
             /** @enum {string} */
-            reviewReason?: "PROVIDER_UNAVAILABLE" | "SKILL_NOT_RECOGNIZED" | "LOW_CONFIDENCE" | "NO_ELIGIBLE_AGENT";
+            reviewReason?: "PROVIDER_UNAVAILABLE" | "SKILL_NOT_RECOGNIZED" | "LOW_CONFIDENCE" | "NO_ELIGIBLE_AGENT" | "ROUTING_FAILED";
         };
         EmployeeResponse: {
             /** @enum {string} */
@@ -344,7 +344,7 @@ export interface components {
         PendingView: {
             rationale?: string;
             /** @enum {string} */
-            reviewReason?: "PROVIDER_UNAVAILABLE" | "SKILL_NOT_RECOGNIZED" | "LOW_CONFIDENCE" | "NO_ELIGIBLE_AGENT";
+            reviewReason?: "PROVIDER_UNAVAILABLE" | "SKILL_NOT_RECOGNIZED" | "LOW_CONFIDENCE" | "NO_ELIGIBLE_AGENT" | "ROUTING_FAILED";
             /** Format: double */
             skillConfidence?: number;
             /** Format: date-time */
@@ -402,7 +402,7 @@ export interface components {
             policyVersion?: string;
             rationale?: string;
             /** @enum {string} */
-            reviewReason?: "PROVIDER_UNAVAILABLE" | "SKILL_NOT_RECOGNIZED" | "LOW_CONFIDENCE" | "NO_ELIGIBLE_AGENT";
+            reviewReason?: "PROVIDER_UNAVAILABLE" | "SKILL_NOT_RECOGNIZED" | "LOW_CONFIDENCE" | "NO_ELIGIBLE_AGENT" | "ROUTING_FAILED";
         };
         SkillView: {
             code?: string;
