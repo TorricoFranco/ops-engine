@@ -103,6 +103,40 @@ public class RouteTicketUseCase {
     }
 
     /**
+     * Registra un intento de ruteo que falló con un error inesperado. Mientras queden intentos,
+     * el ticket sigue esperando y la próxima pasada lo reintenta. Al agotarlos, pasa a una
+     * persona con el motivo ROUTING_FAILED (ADR-016). Recibe solo el nombre de la excepción: su
+     * mensaje puede contener datos del ticket y no se guarda.
+     */
+    public void recordFailedAttempt(TicketId ticketId, String errorName, int maxAttempts) {
+        RoutingOutcome exhausted = transactions.execute(
+                status -> applyFailedAttempt(ticketId, errorName, maxAttempts, clock.instant()));
+        if (exhausted != null) {
+            metrics.decided(exhausted);
+        }
+    }
+
+    private RoutingOutcome applyFailedAttempt(TicketId ticketId, String errorName, int maxAttempts, Instant now) {
+        Ticket ticket = tickets.findById(ticketId).orElseThrow(() -> new TicketNotFoundException(ticketId));
+        if (!ticket.registerRoutingFailure(maxAttempts)) {
+            tickets.save(ticket, null);
+            log.warn("Routing attempt failed, the ticket keeps waiting ticketId={} attempt={} of={}",
+                    ticketId.value(), ticket.routingAttempts(), maxAttempts);
+            return null;
+        }
+
+        ticket.startEvaluation();
+        RoutingOutcome.SendToReview review = new RoutingOutcome.SendToReview(
+                ReviewReason.ROUTING_FAILED,
+                "el ruteo falló " + ticket.routingAttempts() + " veces; último error: " + errorName,
+                List.of(),
+                policy.version());
+        applyReview(ticket, review, now);
+        decisionLog.record(DecisionRecord.of(ticket.id(), decisions.name(), null, review, 0, now));
+        return review;
+    }
+
+    /**
      * Escribe el resultado. Vuelve a leer el ticket para trabajar sobre su versión actual:
      * entre la lectura inicial y este punto pasó una llamada a la red.
      */

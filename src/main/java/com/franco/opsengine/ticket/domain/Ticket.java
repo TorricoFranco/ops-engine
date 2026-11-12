@@ -27,6 +27,7 @@ public class Ticket {
     private TicketStatus status;
     private EmployeeId assignee;
     private String reviewReason;
+    private int routingAttempts;
 
     private Ticket(TicketId id, String title, String description, Impact impact, Skill requiredSkill,
                    Instant createdAt, Instant slaDeadline, long version) {
@@ -67,13 +68,15 @@ public class Ticket {
      */
     public static Ticket rebuild(TicketId id, String title, String description, Impact impact, Skill requiredSkill,
                                  Instant createdAt, Instant slaDeadline, TicketStatus status,
-                                 EmployeeId assignee, String reviewReason, long version) {
+                                 EmployeeId assignee, String reviewReason, int routingAttempts,
+                                 long version) {
         Ticket draft = open(id, title, description, impact, requiredSkill, createdAt, slaDeadline);
         Ticket ticket = new Ticket(draft.id, draft.title, draft.description, draft.impact,
                 draft.requiredSkill, draft.createdAt, draft.slaDeadline, version);
         ticket.status = Objects.requireNonNull(status, "status is required");
         ticket.assignee = assignee;
         ticket.reviewReason = reviewReason;
+        ticket.routingAttempts = routingAttempts;
         return ticket;
     }
 
@@ -101,6 +104,27 @@ public class Ticket {
         String cleanReason = requireText(reason, "reason");
         transitionTo(TicketStatus.INFORMACION_INSUFICIENTE);
         this.reviewReason = cleanReason;
+    }
+
+    /**
+     * Cuenta un intento de ruteo que falló con un error inesperado. Devuelve true cuando se
+     * agotaron los intentos: a partir de ahí el ticket va a una persona en lugar de volver a
+     * intentarse (ADR-016). Solo cuenta mientras el ticket espera, porque el ruteo solo toma
+     * tickets en NUEVO.
+     */
+    public boolean registerRoutingFailure(int maxAttempts) {
+        if (maxAttempts < 1) {
+            throw new IllegalArgumentException("max routing attempts must be at least 1");
+        }
+        if (status != TicketStatus.NUEVO) {
+            throw new IllegalStateException("only a waiting ticket can count a routing failure, status=" + status);
+        }
+        routingAttempts++;
+        return routingAttempts >= maxAttempts;
+    }
+
+    public int routingAttempts() {
+        return routingAttempts;
     }
 
     public void startWork() {

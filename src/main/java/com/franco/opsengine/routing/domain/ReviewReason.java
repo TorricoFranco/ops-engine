@@ -9,5 +9,7 @@ public enum ReviewReason {
     /** La competencia elegida no supera el umbral configurado. */
     LOW_CONFIDENCE,
     /** Ningún empleado cumple los requisitos. */
-    NO_ELIGIBLE_AGENT
+    NO_ELIGIBLE_AGENT,
+    /** El ruteo falló más veces que el tope configurado: el ticket queda para una persona (ADR-016). */
+    ROUTING_FAILED
 }

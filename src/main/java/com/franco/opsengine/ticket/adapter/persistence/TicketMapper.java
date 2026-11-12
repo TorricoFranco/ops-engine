@@ -23,6 +23,7 @@ final class TicketMapper {
                 ticket.createdAt(),
                 ticket.slaDeadline(),
                 idempotencyKey,
+                ticket.routingAttempts(),
                 ticket.version());
     }
 
@@ -38,6 +39,7 @@ final class TicketMapper {
                 entity.getStatus(),
                 entity.getAssigneeId() == null ? null : new EmployeeId(entity.getAssigneeId()),
                 entity.getReviewReason(),
+                entity.getRoutingAttempts(),
                 entity.getVersion());
     }
 }
