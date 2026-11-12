@@ -139,8 +139,8 @@ Las transiciones inválidas se rechazan en el dominio, no en el controlador.
 - Multi-tenant: no en el MVP. Queda como ADR futuro.
 
 **Pendientes**
-- **Acceso a Jev:** conseguir la clave en console.typesafe.ai/keys y revisar la facturación en la consola. Las docs oficiales no detallan cómo se carga el pago ni si hay créditos de prueba.
-- **Guardado de la clave:** variable de entorno del usuario en el equipo de desarrollo, y secreto de GitHub Actions en el CI.
+- **Acceso a Jev:** resuelto. La clave está en una variable de entorno del usuario, en el equipo de desarrollo. No está en el repositorio: `.env` está ignorado y nunca se commiteó. Revisar el saldo en la consola de TypeSafe cuando haga falta.
+- **Clave en el CI:** no hace falta por ahora. Los tests automáticos no llaman a Jev, así que el CI no necesita la clave. Si algún día corre una prueba `@Tag("live")` en CI, se agrega el secreto de GitHub Actions en ese momento.
 
 ## 12. Datos de demo (simulación)
 
