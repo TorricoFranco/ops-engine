@@ -3,6 +3,8 @@ package com.franco.opsengine.ticket.domain;
 import com.franco.opsengine.shared.domain.EmployeeId;
 import com.franco.opsengine.shared.domain.Skill;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -104,6 +106,36 @@ class TicketTest {
 
         assertThat(ticket.status()).isEqualTo(TicketStatus.REVISION_REQUERIDA);
         assertThat(ticket.reviewReason()).contains("La confianza del modelo está por debajo del umbral");
+    }
+
+    @ParameterizedTest
+    @CsvSource({"1,1,true", "3,2,false", "3,3,true", "5,4,false", "5,5,true"})
+    void reportsTheLimitOnceTheFailedAttemptsReachIt(int maxAttempts, int failures, boolean reached) {
+        Ticket ticket = openTicket();
+
+        boolean limitReached = false;
+        for (int attempt = 0; attempt < failures; attempt++) {
+            limitReached = ticket.registerRoutingFailure(maxAttempts);
+        }
+
+        assertThat(limitReached).isEqualTo(reached);
+        assertThat(ticket.routingAttempts()).isEqualTo(failures);
+        assertThat(ticket.status()).isEqualTo(TicketStatus.NUEVO);
+    }
+
+    @Test
+    void requiresAtLeastOneAttemptAsTheLimit() {
+        assertThatThrownBy(() -> openTicket().registerRoutingFailure(0))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void cannotCountRoutingFailuresOnceTheTicketIsNoLongerWaiting() {
+        Ticket ticket = openTicket();
+        ticket.startEvaluation();
+
+        assertThatThrownBy(() -> ticket.registerRoutingFailure(3))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test

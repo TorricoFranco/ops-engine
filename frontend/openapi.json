@@ -162,7 +162,8 @@
               "PROVIDER_UNAVAILABLE",
               "SKILL_NOT_RECOGNIZED",
               "LOW_CONFIDENCE",
-              "NO_ELIGIBLE_AGENT"
+              "NO_ELIGIBLE_AGENT",
+              "ROUTING_FAILED"
             ],
             "type": "string"
           }
@@ -309,7 +310,8 @@
               "PROVIDER_UNAVAILABLE",
               "SKILL_NOT_RECOGNIZED",
               "LOW_CONFIDENCE",
-              "NO_ELIGIBLE_AGENT"
+              "NO_ELIGIBLE_AGENT",
+              "ROUTING_FAILED"
             ],
             "type": "string"
           },
@@ -485,7 +487,8 @@
               "PROVIDER_UNAVAILABLE",
               "SKILL_NOT_RECOGNIZED",
               "LOW_CONFIDENCE",
-              "NO_ELIGIBLE_AGENT"
+              "NO_ELIGIBLE_AGENT",
+              "ROUTING_FAILED"
             ],
             "type": "string"
           }

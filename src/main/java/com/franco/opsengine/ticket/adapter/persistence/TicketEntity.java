@@ -46,6 +46,9 @@ public class TicketEntity {
     @Column(name = "review_reason", columnDefinition = "text")
     private String reviewReason;
 
+    @Column(name = "routing_attempts", nullable = false)
+    private int routingAttempts;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -65,7 +68,7 @@ public class TicketEntity {
 
     TicketEntity(UUID id, String title, String description, Impact impact, String requiredSkill,
                  TicketStatus status, UUID assigneeId, String reviewReason, Instant createdAt,
-                 Instant slaDeadline, String idempotencyKey, long version) {
+                 Instant slaDeadline, String idempotencyKey, int routingAttempts, long version) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -77,6 +80,7 @@ public class TicketEntity {
         this.createdAt = createdAt;
         this.slaDeadline = slaDeadline;
         this.idempotencyKey = idempotencyKey;
+        this.routingAttempts = routingAttempts;
         this.version = version;
     }
 
@@ -122,6 +126,10 @@ public class TicketEntity {
 
     String getIdempotencyKey() {
         return idempotencyKey;
+    }
+
+    int getRoutingAttempts() {
+        return routingAttempts;
     }
 
     long getVersion() {

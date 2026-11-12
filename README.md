@@ -88,6 +88,7 @@ mvn verify
 - [ADR-013: Los tipos del frontend salen del OpenAPI](docs/adr/ADR-013-tipos-del-frontend-desde-openapi.md)
 - [ADR-014: Cada área tiene un nombre en la base](docs/adr/ADR-014-nombres-de-area.md)
 - [ADR-015: Las semillas de desarrollo no bloquean las migraciones nuevas](docs/adr/ADR-015-semillas-y-migraciones-fuera-de-orden.md)
+- [ADR-016: Tope de reintentos del ruteo](docs/adr/ADR-016-tope-de-reintentos-del-ruteo.md)
 - [Cómo correr la evaluación](docs/evaluation/README.md)
 
 ## El papel de la IA

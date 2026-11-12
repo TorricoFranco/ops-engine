@@ -66,6 +66,8 @@ app:
       enabled: true
       interval-ms: 2000
       batch-size: 25
+      # Intentos fallidos antes de mandar el ticket a una persona (ADR-016).
+      max-attempts: 5
 
   outbox:
     dispatcher:

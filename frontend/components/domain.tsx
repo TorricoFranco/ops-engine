@@ -41,6 +41,7 @@ export const REVIEW_LABEL: Record<ReviewReason, string> = {
   SKILL_NOT_RECOGNIZED: "no corresponde a ninguna área",
   LOW_CONFIDENCE: "la competencia no supera el umbral",
   NO_ELIGIBLE_AGENT: "nadie cumple los requisitos",
+  ROUTING_FAILED: "el ruteo falló varias veces",
 };
 
 const OUTCOME_LABEL: Record<DecisionOutcome, { text: string; tone: "ok" | "warn" }> = {
