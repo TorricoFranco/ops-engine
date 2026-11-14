@@ -78,6 +78,11 @@ final class JevTestSupport {
         return new JevDecisionProvider(restClient(properties), properties, openCircuitNever(), noRetry());
     }
 
+    static JevDecisionProvider provider(String baseUrl, JevUsageListener usageListener) {
+        return new JevDecisionProvider(restClient(properties(baseUrl, 1)), properties(baseUrl, 1),
+                openCircuitNever(), noRetry(), usageListener);
+    }
+
     /** Respuesta completa y válida, con la forma que documenta TypeSafe. */
     static String validResponse() {
         return """

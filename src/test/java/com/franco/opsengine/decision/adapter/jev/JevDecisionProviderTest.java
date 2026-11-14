@@ -9,6 +9,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
@@ -50,6 +53,19 @@ class JevDecisionProviderTest {
                         .withStatus(status)
                         .withHeader("Content-Type", "application/json")
                         .withBody(body)));
+    }
+
+    @Test
+    void reportsTheTokensOfEveryAnsweredRequest() {
+        respondWith(200, JevTestSupport.validResponse());
+        List<int[]> tokens = new ArrayList<>();
+        JevDecisionProvider counting = JevTestSupport.provider(baseUrl(),
+                (input, output) -> tokens.add(new int[] {input, output}));
+
+        counting.judge(JevTestSupport.context());
+
+        assertThat(tokens).hasSize(1);
+        assertThat(tokens.getFirst()).containsExactly(180, 24);
     }
 
     @Test
