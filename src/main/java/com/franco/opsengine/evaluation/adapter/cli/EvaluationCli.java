@@ -33,25 +33,47 @@ import java.util.Map;
 public final class EvaluationCli {
 
     /**
-     * Las competencias con su descripción, igual que en la migración V2.
+     * Descripciones de la propuesta V8, descartada. Sirven para comparar con el catálogo vigente.
      *
      * <p>Está duplicado a propósito: traerlas de la base obligaría a levantar el contexto para
      * una herramienta que no lo necesita. Si cambian en V2, hay que cambiarlas acá.
      */
-    private static final Map<Skill, String> CATALOG = new LinkedHashMap<>();
+    private static final Map<Skill, String> CATALOG_V8 = new LinkedHashMap<>();
 
     static {
-        CATALOG.put(new Skill("ACCESS_IDENTITY"),
+        CATALOG_V8.put(new Skill("ACCESS_IDENTITY"),
                 "Inicio de sesión, contraseñas, permisos y accesos de usuarios.");
-        CATALOG.put(new Skill("BILLING"),
-                "Cobros, facturas, reembolsos y problemas con los pagos.");
-        CATALOG.put(new Skill("INTEGRATIONS"),
+        CATALOG_V8.put(new Skill("BILLING"),
+                "Cobros, facturas, notas de crédito, reembolsos, medios de pago y datos fiscales.");
+        CATALOG_V8.put(new Skill("INTEGRATIONS"),
                 "Sincronización, webhooks y conexiones con sistemas externos.");
-        CATALOG.put(new Skill("INFRASTRUCTURE"),
+        CATALOG_V8.put(new Skill("INFRASTRUCTURE"),
                 "Caídas del servicio, lentitud, errores del servidor y capacidad.");
-        CATALOG.put(new Skill("ACCOUNT_MANAGEMENT"),
+        CATALOG_V8.put(new Skill("ACCOUNT_MANAGEMENT"),
+                "Consultas comerciales: planes, precios del plan, contratación, altas y bajas de servicios.");
+    }
+
+    /** Catálogo vigente: el de V4, que V9 volvió a poner en la base. */
+    private static final Map<Skill, String> CATALOG_V4 = new LinkedHashMap<>();
+
+    static {
+        CATALOG_V4.put(new Skill("ACCESS_IDENTITY"),
+                "Inicio de sesión, contraseñas, permisos y accesos de usuarios.");
+        CATALOG_V4.put(new Skill("BILLING"),
+                "Cobros, facturas, reembolsos y problemas con los pagos.");
+        CATALOG_V4.put(new Skill("INTEGRATIONS"),
+                "Sincronización, webhooks y conexiones con sistemas externos.");
+        CATALOG_V4.put(new Skill("INFRASTRUCTURE"),
+                "Caídas del servicio, lentitud, errores del servidor y capacidad.");
+        CATALOG_V4.put(new Skill("ACCOUNT_MANAGEMENT"),
                 "Planes, precios, contratación, cambios de medio de pago y datos de facturación.");
     }
+
+    /**
+     * Precio publicado por TypeSafe: USD por millón de tokens de entrada (los de salida son
+     * gratis). Se pasa con --precio-mtok si cambia.
+     */
+    private static final String DEFAULT_PRICE_PER_MILLION = "0.042";
 
     /** Los mismos umbrales que trae application.yml por defecto. */
     private static final RoutingPolicy POLICY = new RoutingPolicy(
@@ -64,6 +86,26 @@ public final class EvaluationCli {
     public static int run(String[] args, Clock clock) {
         Path datasetPath = Path.of(argumentOr(args, "--dataset", "docs/evaluation/dataset.csv"));
         Path reportPath = Path.of(argumentOr(args, "--report", "docs/evaluation/report.md"));
+        String origin = originPhrase(argumentOr(args, "--origen", "sinteticos"));
+        if (origin == null) {
+            System.err.println("--origen tiene que ser sinteticos o reales");
+            return 1;
+        }
+        String catalogo = argumentOr(args, "--catalogo", "v4");
+        if (!catalogo.equals("v4") && !catalogo.equals("v8")) {
+            System.err.println("--catalogo tiene que ser v4 o v8");
+            return 1;
+        }
+        Map<Skill, String> catalog = catalogo.equals("v8") ? CATALOG_V8 : CATALOG_V4;
+        String catalogLabel = catalogo.equals("v8") ? "V8 (propuesta descartada)" : "V4 (vigente)";
+        double pricePerMillion;
+        try {
+            pricePerMillion = Double.parseDouble(
+                    argumentOr(args, "--precio-mtok", DEFAULT_PRICE_PER_MILLION));
+        } catch (NumberFormatException e) {
+            System.err.println("--precio-mtok tiene que ser un número, por ejemplo 0.042");
+            return 1;
+        }
 
         List<LabelledTicket> dataset;
         try {
@@ -87,10 +129,11 @@ public final class EvaluationCli {
         List<EvaluationStrategy> strategies = new ArrayList<>(List.of(
                 new LeastLoadedStrategy(),
                 new ProviderStrategy("Palabras clave + reglas", new FakeDecisionProvider(),
-                        CATALOG, POLICY)));
+                        catalog, POLICY)));
 
         // Jev solo entra si hay clave. Sin ella el reporte sale igual, con una estrategia
         // menos, en lugar de fallar: la evaluación tiene que poder correrse sin gastar.
+        JevUsageTally usage = new JevUsageTally();
         String apiKey = System.getenv("TYPESAFE_API_KEY");
         if (apiKey == null || apiKey.isBlank()) {
             System.out.println("Sin TYPESAFE_API_KEY: se evalúa sin Jev.");
@@ -98,7 +141,7 @@ public final class EvaluationCli {
             System.out.println("Con TYPESAFE_API_KEY: se incluye Jev ("
                     + dataset.size() + " llamadas a la API).");
             strategies.add(new ProviderStrategy("Jev + reglas",
-                    JevProviderFactory.create(jevProperties(apiKey)), CATALOG, POLICY));
+                    JevProviderFactory.create(jevProperties(apiKey), usage), catalog, POLICY));
         }
 
         List<Evaluator.Run> runs = new ArrayList<>();
@@ -106,10 +149,11 @@ public final class EvaluationCli {
             // Equipo nuevo por estrategia: si compartieran la carga, la segunda arrancaría
             // con el reparto que dejó la primera.
             runs.add(Evaluator.run(strategy, dataset, EvaluationRoster.forSkills(
-                    List.copyOf(CATALOG.keySet()))));
+                    List.copyOf(catalog.keySet()))));
         }
 
-        String report = MarkdownReport.render(runs, dataset.size(), clock.instant());
+        String report = MarkdownReport.render(runs, dataset.size(), origin, catalogLabel, usage,
+                pricePerMillion, clock.instant());
         try {
             Files.createDirectories(reportPath.getParent());
             Files.writeString(reportPath, report, StandardCharsets.UTF_8);
@@ -128,6 +172,20 @@ public final class EvaluationCli {
     private static JevProperties jevProperties(String apiKey) {
         return new JevProperties("https://api.typesafe.ai", apiKey, "jev-latest",
                 Duration.ofSeconds(5), Duration.ofSeconds(30), 3);
+    }
+
+    /**
+     * Cómo se describe el origen de los tickets en el reporte. Valores cortos para que el
+     * argumento no necesite comillas al pasarlo por Maven.
+     *
+     * @return la frase, o null si el valor no se reconoce
+     */
+    private static String originPhrase(String value) {
+        return switch (value) {
+            case "sinteticos" -> "sintéticos";
+            case "reales" -> "reales anonimizados";
+            default -> null;
+        };
     }
 
     private static String argumentOr(String[] args, String name, String fallback) {
