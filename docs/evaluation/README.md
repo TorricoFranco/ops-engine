@@ -18,6 +18,18 @@ Para usar otros archivos:
 mvn spring-boot:run -Dspring-boot.run.arguments="--evaluate --dataset mi.csv --report salida.md"
 ```
 
+Por defecto el reporte dice que los tickets son sintéticos. Para un dataset de tickets reales,
+declará el origen con `--origen reales`:
+
+```bash
+mvn spring-boot:run -Dspring-boot.run.arguments="--evaluate --dataset mi.csv --origen reales"
+```
+
+El reporte también suma los tokens de entrada que factura Jev y estima el costo. Los de salida son
+gratis. El precio por defecto es el publicado por TypeSafe, 0.042 USD por millón de tokens de
+entrada; si cambia, se pasa con `--precio-mtok`. La cuenta de TypeSafe es la que vale: la
+estimación sirve para comparar corridas.
+
 ## La clave de Jev
 
 La aplicación lee `TYPESAFE_API_KEY` del entorno del sistema. **No** la lee de un archivo
@@ -76,6 +88,26 @@ para elegir entre ellas.
   mal puesta sino un área que falta en el catálogo.
 
 Apuntá a 30 casos o más. Con menos, un acierto o un error mueven el porcentaje varios puntos.
+
+## Decisiones de catálogo
+
+Las descripciones de cada área las lee el modelo como criterio. Si una descripción contradice el
+criterio de etiquetado, el motor y las etiquetas no coinciden, y el error se ve como fallo del
+modelo cuando en realidad es una diferencia de definición.
+
+- **Vigente: datos fiscales (CUIT, razón social, dirección fiscal) y cambios de medio de pago van
+  a ACCOUNT_MANAGEMENT; los problemas con los pagos van a BILLING.** Es el catálogo de V2 y V4,
+  restaurado por la migración V9 el 13 de noviembre de 2026.
+- **Propuesta descartada (V8): esos temas pasaban a BILLING.** Se aplicó el 13 de noviembre y se
+  evaluó con tres corridas por set, con V4 y con V8 (`--catalogo v8` la reproduce). En el set
+  sintético, cuyas etiquetas son anteriores a V8, V8 tuvo 5 errores silenciosos más que V4: 92
+  aciertos contra 96,7. En la validación con tickets nuevos la diferencia fue chica: 35,7 aciertos y
+  8,3 errores silenciosos con V8, contra 34,3 y 7 con V4, con rangos superpuestos. Las etiquetas de
+  ambos sets, incluida la de un etiquetador que no vio el catálogo, ponen estos temas en
+  ACCOUNT_MANAGEMENT.
+- **Cómo cambiar el catálogo después:** un cambio de descripciones se prueba con tickets nuevos,
+  etiquetados antes de correr la evaluación con el cambio. No se ajusta mirando los sets que ya se
+  usaron para decidir.
 
 ## Qué mide
 

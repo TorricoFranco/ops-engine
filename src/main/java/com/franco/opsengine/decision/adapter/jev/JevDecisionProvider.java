@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -33,13 +34,21 @@ public class JevDecisionProvider implements DecisionProvider {
     private final JevProperties properties;
     private final CircuitBreaker circuitBreaker;
     private final Retry retry;
+    private final JevUsageListener usageListener;
 
     public JevDecisionProvider(RestClient client, JevProperties properties,
                                CircuitBreaker circuitBreaker, Retry retry) {
+        this(client, properties, circuitBreaker, retry, JevUsageListener.NONE);
+    }
+
+    public JevDecisionProvider(RestClient client, JevProperties properties,
+                               CircuitBreaker circuitBreaker, Retry retry,
+                               JevUsageListener usageListener) {
         this.client = client;
         this.properties = properties;
         this.circuitBreaker = circuitBreaker;
         this.retry = retry;
+        this.usageListener = usageListener;
     }
 
     @Override
@@ -55,6 +64,7 @@ public class JevDecisionProvider implements DecisionProvider {
         long startedAt = System.nanoTime();
         try {
             JevResponse response = call.get();
+            recordUsage(response);
             TicketJudgement judgement = JevAnswerMapper.toJudgement(response);
             log.info("Jev judgement received provider={} skill={} durationMs={}",
                     NAME, judgement.requiredSkill().value(), elapsedMs(startedAt));
@@ -91,6 +101,14 @@ public class JevDecisionProvider implements DecisionProvider {
             // encadena tal cual: solo la clase del error.
             throw new DecisionUnavailableException(
                     "falló la llamada a Jev: " + e.getClass().getSimpleName(), e);
+        }
+    }
+
+    private void recordUsage(JevResponse response) {
+        Map<String, Integer> usage = response.usage();
+        if (usage != null) {
+            usageListener.responded(
+                    usage.getOrDefault("input_tokens", 0), usage.getOrDefault("output_tokens", 0));
         }
     }
 

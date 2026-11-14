@@ -39,6 +39,12 @@ public final class JevProviderFactory {
                 restClient(properties), properties, circuitBreaker, retry(properties));
     }
 
+    /** Informa el uso de tokens de cada respuesta. La evaluación lo usa para estimar el costo. */
+    public static DecisionProvider create(JevProperties properties, JevUsageListener usageListener) {
+        return new JevDecisionProvider(restClient(properties), properties, circuitBreaker(),
+                retry(properties), usageListener);
+    }
+
     /**
      * Timeouts explícitos: sin ellos una llamada colgada bloquearía el hilo indefinidamente y
      * el circuit breaker nunca llegaría a abrirse.
